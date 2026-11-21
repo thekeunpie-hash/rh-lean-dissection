@@ -1,27 +1,26 @@
-# Track C — Task 1: `CapelliIdentities` 및 집중 `pp.explicit` 82개 파일 자동 탈-Elaboration 배치 보고서
+# `pp.explicit`가 많은 82개 파일의 탈-elaboration
 
 > **실행 엔진**: [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (v2, 실행 시간 `44.76s`)  
 > **입력 대상 목록**: [heavy82_targets.json](../out/heavy82_targets.json) (Round 1 [bloat_analysis_data.json](../out/bloat_analysis_data.json)의 `heavy_explicit_files = 82`, `heavy_explicit_total_lines = 75,221L`과 **1줄 오차 없이 100% 일치**)  
 > **원시 검증 매니페스트**: [capelli_batch_manifest.json](../out/capelli_batch_manifest.json)  
-> **변환 섀도우 트리**: `../out/capelli_shadow/` (원본 `downloads/lean/src/` **0바이트 변경 — 완전 불변**)
+> **변환 섀도우 트리**: `../out/capelli_shadow/` (원본 `downloads/lean/src/` **0바이트 변경**)
 
 ---
 
 ## 0. 핵심 정밀 구분: 정적 변환 절감치 vs Lean 4.34.1 단독 하네스 컴파일 검증 완료치
 
-> [!IMPORTANT]
-> 로컬 환경에는 `leanprover/lean4:v4.34.1`만 설치되어 있고, 원 레포지토리의 `leanprover/lean4:v4.33.1` 및 Mathlib `rev 0df444a3` 프리빌드 `.olean` 캐시(`downloads/lean/.lake/`)는 존재하지 않는다. 따라서 아래 두 수치를 엄격히 분리해 보고한다.
+로컬 환경에는 `leanprover/lean4:v4.34.1`만 설치되어 있고, 원 레포지토리의 `leanprover/lean4:v4.33.1` 및 Mathlib `rev 0df444a3` 프리빌드 `.olean` 캐시(`downloads/lean/.lake/`)는 존재하지 않는다. 따라서 아래 두 수치를 엄격히 분리해 보고한다.
 
 | 검증 범주 | 대상 범위 | Before | After | 절감량 (단축률) | 검증 방법 및 상태 |
 | :--- | :--- | ---: | ---: | ---: | :--- |
-| **정적 변환 절감치 (전체 82개 파일)** | Round 1 `heavy_explicit_files` 전수 82개 파일 | **75,221L** (5,825,527B) | **13,612L** (1,008,203B) | **-61,609L (-81.90%)** / **-4,817,324B (-82.69%)** | AST 파서 + 선언명 100% 보존(1,542/1,542) + 괄호 균형 82/82 + 노테이션 인스턴스 누수 **0건** + 팬텀 암묵인자 명명 보존(**116회**) + `sorry`/`axiom`/`admit` 0건 + 안전 롤백 0건 |
+| **정적 변환 절감치 (전체 82개 파일)** | Round 1 `heavy_explicit_files` 82개 파일 | **75,221L** (5,825,527B) | **13,612L** (1,008,203B) | **-61,609L (-81.90%)** / **-4,817,324B (-82.69%)** | AST 파서 + 선언명 100% 보존(1,542/1,542) + 괄호 균형 82/82 + 노테이션 인스턴스 누수 **0건** + 팬텀 암묵인자 명명 보존(**116회**) + `sorry`/`axiom`/`admit` 0건 + 안전 롤백 0건 |
 | ├─ **정적 변환 절감치 (`CapelliIdentities` 46개)** | 82개 중 `CapelliIdentities` 소속 46개 파일 | **66,974L** (5,266,582B) | **6,119L** (498,725B) | **-60,855L (-90.86%)** / **-4,767,857B (-90.53%)** | 전체 절감량의 **98.78%** 차지 (`@` 라인 `55,875 → 703`, -98.74%) |
-| ├─ **정적 변환 절감치 (실제 `pp.explicit` 51개)** | `CapelliIdentities` 46개 + `Lemmata.*` 5개 | **68,146L** (5,339,610B) | **6,537L** (522,286B) | **-61,609L (-90.41%)** / **-4,817,324B (-90.22%)** | `pp.explicit` 직렬화 덤프 전수 변환 (`361`개 선언 리라이트) |
+| ├─ **정적 변환 절감치 (실제 `pp.explicit` 51개)** | `CapelliIdentities` 46개 + `Lemmata.*` 5개 | **68,146L** (5,339,610B) | **6,537L** (522,286B) | **-61,609L (-90.41%)** / **-4,817,324B (-90.22%)** | `pp.explicit` 직렬화 덤프 변환 (`361`개 선언 리라이트) |
 | └─ **수동 `@` 보존 파일 (31개, 오탐 방지)** | `pp.explicit`가 아닌 일반 수동 택틱 `@` 사용 파일 31개 | **7,075L** (485,917B) | **7,075L** (485,917B) | **0L (0.00%)** | **의도적 무변경 보존** — 수동 `@lemma` 택틱 호출 손상률 **0%** |
 | **Lean 4.34.1 단독 코어 하네스 컴파일 검증 완료치** | 구조적으로 서로 다른 **5개 대표 모듈/정리군** (`FixPiIff`, `CovariantDegrees`, `MemOfClosed`, `MulMemIntA`, `Re3`/`Re4` 통합) | 원본 5개 대표 파일 합계 **28,572L** (섀도우 변환 후 **733L**, -97.43%; `Re3` 쌍둥이 포함 6개 **32,241L → 961L**) | 순수 Lean 4 코어 하네스 5개 (총 **907L**, 명시적 `@` vs 탈-elaboration `rfl` 커널 동치 증명 포함) | **5 / 5 컴파일 통과** | `elan run leanprover/lean4:v4.34.1 lean <file>` **전원 `exit 0`, 오류 0, 경고 0, `sorry` 0, `axiom` 0** |
 
 ### Round 1 보고서 표기 정밀 보정 (중요 발견)
-Round 1 [bloat_report.md](../out/bloat_report.md#L144)에서는 `heavy_explicit_files = 82 (75,221L)`(조건: `reachable ∧ explicit_at_lines ≥ 20 ∧ explicit_at_lines / code_lines ≥ 0.15`)을 요약하여 "`Capelli` 82개 집중 파일"로 통칭했으나, 이번 전수 역추적 결과 정확한 분포는 다음과 같다:
+Round 1 [bloat_report.md](../out/bloat_report.md#L144)에서는 `heavy_explicit_files = 82 (75,221L)`(조건: `reachable ∧ explicit_at_lines ≥ 20 ∧ explicit_at_lines / code_lines ≥ 0.15`)을 요약하여 "`Capelli` 82개 집중 파일"로 통칭했으나, 이번 역추적 결과 정확한 분포는 다음과 같다:
 - **`Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.*` 소속**: **46개 파일 / 66,974L / `@` 라인 55,875L** (82개 파일 전체 라인의 **89.04%**, 전체 `@` 라인의 **95.73%**, 전체 절감 라인의 **98.78%**).
 - **외부 라이브러리 `pp.explicit` 덤프 (`Lemmata.*`)**: **5개 파일 / 1,172L / `@` 라인 718L** (`Lemmata.GeneralBFactRightTerForm.Imports`, `GeneralBFactLeftAltForm.MQ`, `GeneralBFactLeftVersion.Imports`, `ClearingDenominators.UmonLeUzmon`, `GeneralBFactThirdVersion.Imports`).
 - **외부 라이브러리 수동 `@` 파일**: **31개 파일 / 7,075L / `@` 라인 1,772L** (`MultiplicationLatticeSecond` 924L 등 — `pp.explicit` 덤프가 아니라 수동 `@` 호출). `de_explicit_capelli.py`는 이 31개 파일을 자동 판별하여 **단 한 글자도 훼손하지 않고 원문 보존**했다.
@@ -39,14 +38,14 @@ Round 1 [bloat_report.md](../out/bloat_report.md#L144)에서는 `heavy_explicit_
    - 대상 파일 전체 원문에서 절단 없이(DuckDB 250자 절단 컬럼 미사용) 파싱한 **364개 프로젝트 로컬 바인더 스키마**를 적용하되, (a) `[인스턴스]` 슬롯에서 제거할 인자가 실제 인스턴스 표현식(`@*.to*`, `@*inst*`, `inst_k`, `hl`, `hP`)인지 사중 안전 검증하고, (b) **명시적 인자 타입과 반환 타입 어디에서도 추론할 수 없는 팬텀 암묵 바인더(`{E}`, `{K}` 등)** 는 전이적 추론 가능성 고정점 분석으로 자동 탐지해 명명 인자 `(E := E)` / `(K := K)`로 보존(총 **116회** 적용; 익명 추론 불가 바인더는 안전하게 Tier 2 폴백).
 3. **Tier 2 — 미등록 심볼에 대한 항수(Arity) 보존 와일드카드 폴딩 (9,611회 적용, 13,886개 인스턴스 슬롯 축약)**:
    - Tier 1 카탈로그에 없는 `@Head arg₀ ... argₖ`는 **`@Head`, 유니버스 인자 `.{...}`, 그리고 모든 위치 인자 슬롯을 1:1 그대로 보존**하고, 순수 합성 타입클래스 사전(`@*.to*`, `@*inst*`, 표준 Mathlib 사전)인 인자만 `_`로 치환한다. 이로써 알지 못하는 선언의 값·타입 인자가 탈락할 확률이 구조적으로 **0%**가 된다.
-4. **자동 사후 무결성 검증 및 v2 회귀 방지 가드 (82개 파일 전수 통과)**:
+4. **자동 사후 무결성 검증 및 v2 회귀 방지 가드 (82개 파일 통과)**:
    - **선언명 100% 보존**: `1,542 / 1,542` (`theorem`/`lemma`/`def`/`abbrev`/`structure`/`class`/`inductive`/`instance`/`axiom`/`opaque`, 탈락 0, 개명 0).
-   - **괄호·구분자 균형**: `82 / 82` (`()`, `[]`, `{}`, `⟨⟩` 전수 일치, 안전 롤백 `0`건).
-   - **노테이션 인스턴스 누수 검사(`check_notation_instance_leaks`)**: `→L[...]`, `→ₗ[...]`, `⧸` 우변에 타입클래스 인스턴스가 오출력되는 버그 전수 탐지 → **`0 / 82` 파일 (`0`건)**.
+   - **괄호·구분자 균형**: `82 / 82` (`()`, `[]`, `{}`, `⟨⟩` 일치, 안전 롤백 `0`건).
+   - **노테이션 인스턴스 누수 검사(`check_notation_instance_leaks`)**: `→L[...]`, `→ₗ[...]`, `⧸` 우변에 타입클래스 인스턴스가 오출력되는 버그 탐지 → **`0 / 82` 파일 (`0`건)**.
    - **금지 토큰 미도입**: 신규 `sorry` `0`건, 신규 `axiom` `0`건, 신규 `admit` `0`건.
-   - **v2 수정 내역 (`@adversarial_critic` #32 반영)**:
-     - `ContinuousLinearMap` 13-인자 스키마 오프바이원 수정: 공역 `M₂` 슬롯을 `args[9]`(`[TopologicalSpace M₂]`)에서 정확한 `args[8]`(`M₂`)로 교정하여 `HloweqTransfer.lean`·`ComplexNormedInstanceCompat.lean`의 `→L[Complex]` 24개소 전수 복구(`(L2 ε) →L[Complex] (L2 ε)`).
-     - 팬텀 암묵 바인더 자동 명명 보존(`phantom_named_preserved = 116`): `CovariantDegrees.KwF (E := E)` (최종 섀도우 호출 36/36 전수 보존), `SelectionLemmas.hcompl (K := K)` 및 `loc (K := K)` (3개소), `SquareOfApproximation.IsSplit (E := E)` (1개소) 전수 복구.
+   - **v2 수정 내역 (검수 메모 #32 반영)**:
+     - `ContinuousLinearMap` 13-인자 스키마 오프바이원 수정: 공역 `M₂` 슬롯을 `args[9]`(`[TopologicalSpace M₂]`)에서 정확한 `args[8]`(`M₂`)로 교정하여 `HloweqTransfer.lean`·`ComplexNormedInstanceCompat.lean`의 `→L[Complex]` 24개소 복구(`(L2 ε) →L[Complex] (L2 ε)`).
+     - 팬텀 암묵 바인더 자동 명명 보존(`phantom_named_preserved = 116`): `CovariantDegrees.KwF (E := E)` (최종 섀도우 호출 36/36 보존), `SelectionLemmas.hcompl (K := K)` 및 `loc (K := K)` (3개소), `SquareOfApproximation.IsSplit (E := E)` (1개소) 복구.
 
 ---
 
