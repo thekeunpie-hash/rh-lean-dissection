@@ -1,29 +1,28 @@
-# Track C — Task 1: Automated De-Elaboration Batch Report for `CapelliIdentities` and 82 Heavy-`pp.explicit` Files
+# De-elaboration of the 82 heavy `pp.explicit` files
 
 > **Language**: English ([한국어 원문](ko/capelli_batch_report.md))
 
 > **Execution Engine**: [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (v2, runtime `44.76s`)  
 > **Target Input List**: [heavy82_targets.json](../out/heavy82_targets.json) (**100% exact match, 0-line discrepancy** with Round 1 [bloat_analysis_data.json](../out/bloat_analysis_data.json) `heavy_explicit_files = 82`, `heavy_explicit_total_lines = 75,221L`)  
 > **Raw Verification Manifest**: [capelli_batch_manifest.json](../out/capelli_batch_manifest.json)  
-> **Transformed Shadow Tree**: `../out/capelli_shadow/` (original `downloads/lean/src/` **0 bytes modified — strictly immutable**)
+> **Transformed Shadow Tree**: `../out/capelli_shadow/` (original `downloads/lean/src/` **0 bytes changed**)
 
 ---
 
-## 0. Key Precision Distinction: Static Transformation Savings vs. Standalone Lean 4.34.1 Harness Compilation Verification
+## 0. Static savings and harness compiles are different measurements
 
-> [!IMPORTANT]
-> Only `leanprover/lean4:v4.34.1` is installed locally; neither the repository's `leanprover/lean4:v4.33.1` toolchain nor prebuilt Mathlib `rev 0df444a3` `.olean` caches (`downloads/lean/.lake/`) are present. Accordingly, the two metric classes below are reported strictly separately.
+Only `leanprover/lean4:v4.34.1` is installed locally; neither the repository's `leanprover/lean4:v4.33.1` toolchain nor prebuilt Mathlib `rev 0df444a3` `.olean` caches (`downloads/lean/.lake/`) are present. Accordingly, the two metric classes below are reported strictly separately.
 
 | Verification Category | Scope | Before | After | Reduction (% Saved) | Verification Method & Status |
 | :--- | :--- | ---: | ---: | ---: | :--- |
 | **Static Transformation Savings (All 82 Files)** | All 82 files in Round 1 `heavy_explicit_files` | **75,221L** (5,825,527B) | **13,612L** (1,008,203B) | **-61,609L (-81.90%)** / **-4,817,324B (-82.69%)** | AST parser + 100% declaration-name preservation (1,542/1,542) + delimiter balance 82/82 + **0** notation instance leaks + phantom implicit named preservation (**116** sites) + 0 `sorry`/`axiom`/`admit` + 0 safety rollbacks |
 | ├─ **Static Transformation Savings (`CapelliIdentities` 46 files)** | 46 files under `CapelliIdentities` out of the 82 | **66,974L** (5,266,582B) | **6,119L** (498,725B) | **-60,855L (-90.86%)** / **-4,767,857B (-90.53%)** | Accounts for **98.78%** of total line savings (`@`-lines `55,875 → 703`, -98.74%) |
-| ├─ **Static Transformation Savings (Actual `pp.explicit` 51 files)** | 46 `CapelliIdentities` + 5 `Lemmata.*` files | **68,146L** (5,339,610B) | **6,537L** (522,286B) | **-61,609L (-90.41%)** / **-4,817,324B (-90.22%)** | Exhaustive conversion of all `pp.explicit` serialized dumps (`361` declarations rewritten) |
+| ├─ **Static Transformation Savings (Actual `pp.explicit` 51 files)** | 46 `CapelliIdentities` + 5 `Lemmata.*` files | **68,146L** (5,339,610B) | **6,537L** (522,286B) | **-61,609L (-90.41%)** / **-4,817,324B (-90.22%)** | Conversion of all `pp.explicit` serialized dumps (`361` declarations rewritten) |
 | └─ **Preserved Manual-`@` Files (31 files, False-Positive Guard)** | 31 files using ordinary hand-written `@` tactics rather than `pp.explicit` | **7,075L** (485,917B) | **7,075L** (485,917B) | **0L (0.00%)** | **Intentionally untouched** — **0%** corruption rate on manual `@lemma` tactic calls |
 | **Standalone Lean 4.34.1 Core Harness Compilation Verification** | **5 structurally distinct representative modules/theorem families** (`FixPiIff`, `CovariantDegrees`, `MemOfClosed`, `MulMemIntA`, unified `Re3`/`Re4`) | 5 representative originals total **28,572L** (**733L** after shadow transform, -97.43%; 6 files including twin `Re3`: **32,241L → 961L**) | 5 pure Lean 4 core harnesses (**907L** total, including kernel `rfl` definitional-equality proofs between explicit `@` and de-elaborated forms) | **5 / 5 compiled** | `elan run leanprover/lean4:v4.34.1 lean <file>` **all `exit 0`, 0 errors, 0 warnings, 0 `sorry`, 0 `axiom`** |
 
-### Precision Correction to Round 1 Report Framing (Key Finding)
-Round 1 [bloat_report.md](../out/bloat_report.md#L144) loosely referred to `heavy_explicit_files = 82 (75,221L)` (criterion: `reachable ∧ explicit_at_lines ≥ 20 ∧ explicit_at_lines / code_lines ≥ 0.15`) as "82 heavy `Capelli` files". Exhaustive back-tracing reveals the exact breakdown:
+### Correction to the Round 1 framing
+Round 1 [bloat_report.md](../out/bloat_report.md#L144) loosely referred to `heavy_explicit_files = 82 (75,221L)` (criterion: `reachable ∧ explicit_at_lines ≥ 20 ∧ explicit_at_lines / code_lines ≥ 0.15`) as "82 heavy `Capelli` files". Tracing the 82 paths gives the exact breakdown:
 - **Under `Development.AutomorphicArithmetic.IntegralCasts.CapelliIdentities.*`**: **46 files / 66,974L / 55,875 `@`-lines** (**89.04%** of total lines across the 82 files, **95.73%** of all `@`-lines, and **98.78%** of all lines saved).
 - **External library `pp.explicit` dumps (`Lemmata.*`)**: **5 files / 1,172L / 718 `@`-lines** (`Lemmata.GeneralBFactRightTerForm.Imports`, `GeneralBFactLeftAltForm.MQ`, `GeneralBFactLeftVersion.Imports`, `ClearingDenominators.UmonLeUzmon`, `GeneralBFactThirdVersion.Imports`).
 - **External library manual-`@` files**: **31 files / 7,075L / 1,772 `@`-lines** (`MultiplicationLatticeSecond` 924L, etc. — hand-written `@` calls rather than `pp.explicit` dumps). `de_explicit_capelli.py` automatically classifies these 31 files and **preserves them verbatim without changing a single character**.
@@ -44,9 +43,9 @@ Round 1 [bloat_report.md](../out/bloat_report.md#L144) loosely referred to `heav
 4. **Automated Post-Transform Integrity Verification & v2 Regression Guards (82/82 Files Passed)**:
    - **100% Declaration-Name Preservation**: `1,542 / 1,542` (`theorem`/`lemma`/`def`/`abbrev`/`structure`/`class`/`inductive`/`instance`/`axiom`/`opaque`, 0 dropped, 0 renamed).
    - **Delimiter & Bracket Balance**: `82 / 82` (`()`, `[]`, `{}`, `⟨⟩` all balanced; `0` safety rollbacks).
-   - **Notation Instance Leak Check (`check_notation_instance_leaks`)**: Exhaustive check for typeclass instances erroneously emitted on the right-hand side of `→L[...]`, `→ₗ[...]`, or `⧸` → **`0 / 82` files (`0` leaks)**.
+   - **Notation Instance Leak Check (`check_notation_instance_leaks`)**: check for typeclass instances erroneously emitted on the right-hand side of `→L[...]`, `→ₗ[...]`, or `⧸` → **`0 / 82` files (`0` leaks)**.
    - **Zero Forbidden Tokens Introduced**: `0` new `sorry`, `0` new `axiom`, `0` new `admit`.
-   - **v2 Fixes (incorporating `@adversarial_critic` #32)**:
+   - **v2 Fixes (incorporating review note #32)**:
      - Fixed the `ContinuousLinearMap` 13-argument schema off-by-one: corrected the codomain `M₂` slot from `args[9]` (`[TopologicalSpace M₂]`) to the true `args[8]` (`M₂`), restoring all 24 `→L[Complex]` sites in `HloweqTransfer.lean` and `ComplexNormedInstanceCompat.lean` to `(L2 ε) →L[Complex] (L2 ε)`.
      - Automated named preservation of phantom implicit binders (`phantom_named_preserved = 116`): restored `CovariantDegrees.KwF (E := E)` (36/36 calls in the final shadow), `SelectionLemmas.hcompl (K := K)` and `loc (K := K)` (3 sites), and `SquareOfApproximation.IsSplit (E := E)` (1 site).
 
