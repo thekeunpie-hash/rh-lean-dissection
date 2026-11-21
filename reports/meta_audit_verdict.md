@@ -1,8 +1,8 @@
-# Round 2 Deep Audit Report: Zero-Blind-Spot Metaprogramming & Mathematical Edge-Case Final Verdict (Track A)
+# Metaprogramming and edge cases in the Lean 4.33.1 RH/GRH tree
 
 > **Language**: English ([한국어 원문](ko/meta_audit_verdict.md))
 
-- **Audit Role**: `meta_auditor` (Track A — Zero-Blind-Spot Deep Auditor)
+- **Scope**: metaprogramming, special declarations, and the RH/GRH edge cases
 - **Audit Target**: `../lean/src/` (Lean `v4.33.1`, Mathlib `0df444a360eaa60ab8c11dca51a86af692955474`, 175,187 modules total)
 - **Foundational Artifacts & Index**:
   - `../out/lean_index.duckdb`
@@ -13,32 +13,32 @@
 
 ---
 
-## 0. Executive Verdict
+## 0. Result
 
-### **Final Verdict: `CLEAN` — 0 Static Blind Spots (Full Metaprogramming, Special-Declaration, and RH/GRH Edge-Case Audit Passed)**
+### **Result: `CLEAN` — 0 Static Blind Spots (Full Metaprogramming, Special-Declaration, and RH/GRH Edge-Case Audit Passed)**
 
-Every metaprogramming construct and non-routine declaration or option detected with a non-zero count by the Round 1 scanner (`deep_audit.py`) was inspected 100% line-by-line from raw source, and all analytic number theory edge cases of the 5 final theorems in `Main.lean` along with the isolation of `SmallClassNumbers.CorGKOf` were cross-verified. The audit confirms **0 pathways to bypass the Lean 4 trusted kernel typechecker or inject hidden axioms, and 0 vacuous mathematical loopholes in the RH/GRH statements or their reduction proofs**.
+Every metaprogramming construct and non-routine declaration or option with a non-zero count in the Round 1 scanner (`deep_audit.py`) was read from source. The edge cases of the 5 theorems in `Main.lean`, and whether `SmallClassNumbers.CorGKOf` sits outside that cone, were checked against the same files. In those hits there is no path that skips the Lean 4 kernel typechecker or adds a hidden axiom, and the RH/GRH statements do not go vacuous on the edges that were checked.
 
 | Audit Area | Total Hits | Line-by-Line Coverage | Kernel Bypass / Axiom Injection Possibility | In `Main` / `MainTheorems` Cone? | Verdict |
 | :--- | ---: | ---: | :--- | :--- | :--- |
-| `CutCptCopy.lean` (`addDecl` ×2, `partial def` ×1, `elab` ×1) | 1 module (91 lines) | **100%** | **Impossible** (submits only `.defnDecl`/`.thmDecl` → C++ `lean_add_decl` verification; 0 `debug.skipKernelTC`) | In module cone (`Main` depth 17, `MainTheorems` depth 14); **dynamically generated theorem (`block_growth_bound_of_compact_coefCpt`) is actually consumed at `FinalS.lean:61`** | **CLEAN** |
-| `BuildAid/D1..D5.lean` (`run_cmd` / `modifyEnv`, 5 each) | 5 modules (4 lines each) | **100%** | **Impossible** (only appends strings to `LibrarySuggestions.nameDenyListExt`; no access to the kernel constant table) | In module cone (depth 5–18 from `MainTheorems`), 0 declarations, 0 proof-term contribution | **CLEAN** |
-| Repo-wide `elab` (3 modules) | 4 hits | **100%** | **Impossible** (`cpt_copy_thms`, `kexactB`, and `kcopy` all require final kernel checking; `#kcopy_probe` is a read-only, uninvoked diagnostic command) | In module cone (`Imports` depth 4, `OwnStruct` depth 6, `CutCptCopy` depth 14 from `MainTheorems`), no elaborator code in proof terms | **CLEAN** |
-| Repo-wide `partial def` (2 modules) | 2 hits | **100%** | **Impossible** (compile-time meta-functions only; Lean 4 `partial def` itself is sound as kernel `opaque`) | In module cone, **0** occurrences in kernel proof terms | **CLEAN** |
-| Global `macro` (19 modules) | 22 hits | **100%** | **Impossible** (all 22 are `: tactic =>` tactic shorthands; 0 shadowing) | 19/19 modules in `MainTheorems` cone | **CLEAN** |
-| `allowUnsafeReducibility` | 37 hits | **100%** | **Impossible** (all 37/37 solely attach `attribute [local irreducible]`, an elaborator transparency option) | In module cone (`DB_Rch` 37/37) | **CLEAN** |
-| `hygiene` | 31 hits | **100%** | **Impossible** (all 31/31 are `set_option hygiene false in` + `local notation` 22 / `local macro` 8 / `scoped macro` 1) | In module cone (`DB_Rch` 31/31) | **CLEAN** |
-| Other non-routine `set_option` (`quotPrecheck` 7, `smartUnfolding` 3, `Elab.async` 1, `genSizeOf` 1, `warn.classDefReducibility` 1) | 13 hits | **100%** | **Impossible** (across all 33 option kinds / 88,139 total occurrences, **0** `debug.skipKernelTC`/`debug.proofAsSorry`) | In module cone | **CLEAN** |
+| `CutCptCopy.lean` (`addDecl` ×2, `partial def` ×1, `elab` ×1) | 1 module (91 lines) | **100%** | **none found** (submits only `.defnDecl`/`.thmDecl` → C++ `lean_add_decl` verification; 0 `debug.skipKernelTC`) | In module cone (`Main` depth 17, `MainTheorems` depth 14); **dynamically generated theorem (`block_growth_bound_of_compact_coefCpt`) is actually consumed at `FinalS.lean:61`** | **CLEAN** |
+| `BuildAid/D1..D5.lean` (`run_cmd` / `modifyEnv`, 5 each) | 5 modules (4 lines each) | **100%** | **none found** (only appends strings to `LibrarySuggestions.nameDenyListExt`; no access to the kernel constant table) | In module cone (depth 5–18 from `MainTheorems`), 0 declarations, 0 proof-term contribution | **CLEAN** |
+| Repo-wide `elab` (3 modules) | 4 hits | **100%** | **none found** (`cpt_copy_thms`, `kexactB`, and `kcopy` all require final kernel checking; `#kcopy_probe` is a read-only, uninvoked diagnostic command) | In module cone (`Imports` depth 4, `OwnStruct` depth 6, `CutCptCopy` depth 14 from `MainTheorems`), no elaborator code in proof terms | **CLEAN** |
+| Repo-wide `partial def` (2 modules) | 2 hits | **100%** | **none found** (compile-time meta-functions only; Lean 4 `partial def` itself is sound as kernel `opaque`) | In module cone, **0** occurrences in kernel proof terms | **CLEAN** |
+| Global `macro` (19 modules) | 22 hits | **100%** | **none found** (all 22 are `: tactic =>` tactic shorthands; 0 shadowing) | 19/19 modules in `MainTheorems` cone | **CLEAN** |
+| `allowUnsafeReducibility` | 37 hits | **100%** | **none found** (all 37/37 solely attach `attribute [local irreducible]`, an elaborator transparency option) | In module cone (`DB_Rch` 37/37) | **CLEAN** |
+| `hygiene` | 31 hits | **100%** | **none found** (all 31/31 are `set_option hygiene false in` + `local notation` 22 / `local macro` 8 / `scoped macro` 1) | In module cone (`DB_Rch` 31/31) | **CLEAN** |
+| Other non-routine `set_option` (`quotPrecheck` 7, `smartUnfolding` 3, `Elab.async` 1, `genSizeOf` 1, `warn.classDefReducibility` 1) | 13 hits | **100%** | **none found** (across all 33 option kinds / 88,139 total occurrences, **0** `debug.skipKernelTC`/`debug.proofAsSorry`) | In module cone | **CLEAN** |
 | RH/GRH mathematical edge cases (`Main` and 8+ files) | 5 final theorems | **100%** | — (`s=0`, `s=-2(n+1)`, `s=1`, `[NeZero N]`, `χ=1` vs `χ≠1`, imprimitive Euler factors, `Re(s)=0,1` all rigorously verified) | 100% match across all 5 theorems in `Main.lean` | **CLEAN** |
 | `MainTheoremsAll` → `SmallClassNumbers.CorGKOf` isolation | 4 auxiliary modules | **100%** | — (0 imports of the 4 modules in the `MainTheorems` cone; complete isolation) | Included only in `Main`, **outside the `MainTheorems` cone** | **CLEAN** |
 
-> **Audit Scope Boundary**: This report presents a **100% static, line-by-line source and kernel-architecture deep audit** performed in an environment without a local `leanprover/lean4:v4.33.1` toolchain or `.lake/` build cache. Full binary-level formal certification still requires running `lake build Main` and `#print axioms` on all 5 final theorems in a `v4.33.1` environment.
+> **Audit Scope Boundary**: This report presents a **100% static, line by line source and kernel-architecture deep audit** performed in an environment without a local `leanprover/lean4:v4.33.1` toolchain or `.lake/` build cache. Full binary-level formal certification still requires running `lake build Main` and `#print axioms` on all 5 final theorems in a `v4.33.1` environment.
 
 ---
 
-## Part 1. Line-by-Line Exhaustive Audit of Metaprogramming and Special Declarations
+## Part 1. Line-by-Line Audit of Metaprogramming and Special Declarations
 
-### 1.1 Exhaustive Audit of `CutCptCopy.lean` (`addDecl` ×2 · `partial def` ×1 · `elab` ×1)
+### 1.1 Audit of `CutCptCopy.lean` (`addDecl` ×2 · `partial def` ×1 · `elab` ×1)
 
 - **Target Files**:
   - Core implementation (91 lines in full): `../lean/src/Formalism/HermitianCurvature/HermitianCurvatureProofs/CutCptCopy.lean`
@@ -150,7 +150,7 @@ Every metaprogramming construct and non-routine declaration or option detected w
    - Unchecked kernel registration API `addDeclWithoutChecking` (`Environment.lean:307-308`): **0 hits** across all 175,187 files.
    - Kernel-checking disable option `debug.skipKernelTC`: **0 hits** across all 88,139 `set_option` directives (33 kinds) and `lakefile.toml`.
    - `set_option maxHeartbeats 0 in` at `CutMainCpt.lean:944` lifts only the timeout budget while sequentially typechecking many theorems inside a single command; it has zero effect on the `doCheck` flag or kernel typechecking rules.
-3. **Complete structural block on axiom / opaque-constant injection**: `copyAll` (`L76-84`) submits exclusively `.defnInfo` → `Declaration.defnDecl` (`L78`) and `.thmInfo` → `Declaration.thmDecl` (`L82`), terminating with an error on every other case (`.axiomInfo`, `.opaqueInfo`, `.inductInfo`, `.quotInfo`, etc.) via `L84` (`| _ => throwError "cannot copy {n}"`). Moreover, even a single type or universe mismatch between the `subst tainted`-rewritten `type` and `value` is immediately rejected by C++ `lean_add_decl` with `(kernel) declaration type mismatch`.
+3. **Complete structural block on axiom / opaque-constant injection**: `copyAll` (`L76-84`) submits exclusively `.defnInfo` → `Declaration.defnDecl` (`L78`) and `.thmInfo` → `Declaration.thmDecl` (`L82`), terminating with an error on every other case (`.axiomInfo`, `.opaqueInfo`, `.inductInfo`, `.quotInfo`, etc.) via `L84` (`| _ => throwError "cannot copy {n}"`). Even a single type or universe mismatch between the `subst tainted`-rewritten `type` and `value` is immediately rejected by C++ `lean_add_decl` with `(kernel) declaration type mismatch`.
 
 #### (c) Exact Dependency Footprint
 
@@ -161,7 +161,7 @@ Every metaprogramming construct and non-routine declaration or option detected w
 
 ---
 
-### 1.2 Exhaustive Audit of `BuildAid/D1.lean` – `BuildAid/D5.lean` (`run_cmd` / `modifyEnv`, 5 each)
+### 1.2 Audit of `BuildAid/D1.lean` – `BuildAid/D5.lean` (`run_cmd` / `modifyEnv`, 5 each)
 
 DuckDB confirms that the `BuildAid` directory contains exactly the 5 files `D1.lean`–`D5.lean`, each exactly 4 lines long with 0 declarations (`decl_count = 0`).
 
@@ -237,7 +237,7 @@ All 5 modules lie in the module import cones of `Main` and `Supplements.Kernels.
 
 ---
 
-### 1.3 Exhaustive Audit of All 4 Repository-Wide `elab` Declarations (All 3 Files Read in Full)
+### 1.3 Audit of All 4 Repository-Wide `elab` Declarations (All 3 Files Read in Full)
 
 Per the Round 1 scan (`deep_audit_results.json`), the total number of `elab` / `elab_rules` declarations across all 175,187 files is **exact count 4 (across 3 modules)**. (`elab_rules`: 0 hits; `syntax`: 0 hits.)
 
@@ -298,7 +298,7 @@ Per the Round 1 scan (`deep_audit_results.json`), the total number of `elab` / `
       let (_, bad) ← (copyAt true e tgt "" 64).run #[]
       logInfo m!"kcopy_probe: {bad.size} refused: {bad.toList}"
     ```
-  - **Exhaustive check of all 4 direct importers**:
+  - **check of all 4 direct importers**:
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/ExistsKeptChoiceUpperLattice.lean:26`: `by kcopy n.tp`, `by kcopy n.tie`, `by kcopy n.chrPsi`
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/FormsRe.lean:20`: `by kcopy T`
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/HermRe.lean:19`: `by kcopy H`
@@ -317,7 +317,7 @@ Per the Round 1 scan (`deep_audit_results.json`), the total number of `elab` / `
 
 ---
 
-### 1.4 Exhaustive Audit of All 2 Repository-Wide `partial def` Declarations (Both Files Read in Full)
+### 1.4 Audit of All 2 Repository-Wide `partial def` Declarations (Both Files Read in Full)
 
 Per `deep_audit_results.json`, the total count of `partial def` (and all `partial` declarations including `partial abbrev`/`instance`/`theorem`) across all 175,187 files is **exact count 2**.
 
@@ -329,16 +329,16 @@ Per `deep_audit_results.json`, the total count of `partial def` (and all `partia
 #### Lean 4 Kernel Soundness Argument & Dependency Footprint
 
 1. **Intrinsic soundness of `partial def` in the Lean 4 kernel**: Lean 4 never adds a `partial def f : α → β := body` to the logical kernel as a non-terminating recursive axiom. Instead, it requires an `Inhabited`/`Nonempty` witness for the codomain `β` and registers `f` in the kernel as an **`opaque` constant** (making it impossible to inhabit `Empty` or `False`). The kernel cannot unfold `f`'s recursive equations at all; `body` is used exclusively by the compiler/VM (e.g., elaborator metacode).
-2. **Complete meta-level isolation**: Furthermore, both `partial def` declarations in this repository are **pure compile-time meta-functions** operating on `Environment`/`NameSet` and `MetaM Expr`—completely unrelated to mathematical types (`ℂ`, `DirichletCharacter`, etc.)—and appear **0 times** in the kernel proof terms of `Main`'s 5 final theorems.
+2. **Complete meta-level isolation**: Both `partial def` declarations in this repository are **pure compile-time meta-functions** operating on `Environment`/`NameSet` and `MetaM Expr`—completely unrelated to mathematical types (`ℂ`, `DirichletCharacter`, etc.)—and appear **0 times** in the kernel proof terms of `Main`'s 5 final theorems.
 3. **Module import cone**: Both enter the module import cone via `CutCptCopy` (`MainTheorems` depth 14) and `OwnStruct` (`MainTheorems` depth 6), but are absent from the kernel proof-term cone.
 
 ---
 
-### 1.5 Exhaustive (100%) Audit of Global `macro` (22) · `allowUnsafeReducibility` (37) · `hygiene` (31) · Other Non-Routine `set_option` (13)
+### 1.5 (100%) Audit of Global `macro` (22) · `allowUnsafeReducibility` (37) · `hygiene` (31) · Other Non-Routine `set_option` (13)
 
 Going beyond Round 1 sampling, this deep audit inspected directly from disk 100% of the raw source context for **all 22/22 global `macro` declarations**, **all 37/37 `allowUnsafeReducibility` occurrences**, **all 31/31 `hygiene` occurrences**, and **all 13/13 other non-routine `set_option` occurrences** recorded in `deep_audit_results.json`.
 
-#### (1) Exhaustive Verification Table of All 22/22 Global `macro` Definitions (19 Modules, All in `MainTheorems` Cone)
+#### (1) Verification Table of All 22/22 Global `macro` Definitions (19 Modules, All in `MainTheorems` Cone)
 
 **All 22 are `: tactic =>` tactic shorthands**; there are **0** term (`: term`), command (`: command`), or notation macros. None shadows any Lean/Mathlib primitive keyword or `Statements.lean`/`Main.lean` identifier, and every expansion reduces to ordinary tactics (`simp`, `omega`, `ring`, `grind`, `linarith`, `module`, `apply`, `erw`, `exact`, etc.) that undergo standard kernel typechecking.
 
@@ -369,15 +369,15 @@ Going beyond Round 1 sampling, this deep audit inspected directly from disk 100%
 
 *(Note: The remaining 65 local/scoped `macro` definitions likewise consist strictly of local tactic/term shorthands such as `kc%`/`kq%`/`kd%`/`tr_via`/`obt`/`opens_le`/`tie_cases`/`pre_cases`, all of which pass kernel verification after elaboration.)*
 
-#### (2) Exhaustive Verification of All 37/37 `allowUnsafeReducibility` Occurrences
+#### (2) Verification of All 37/37 `allowUnsafeReducibility` Occurrences
 
 **All 37 occurrences serve exclusively to attach `attribute [local irreducible]` to definitions from other modules**; not a single instance forces `[reducible]` or mutates global attributes:
-- **30 hits** (`IsCrisP.lean:49`, `AlgClosureTensorBcrisToBdRInjective.lean:67`, `ExistsPowNorm.lean:86`, etc. across 26 modules under `InertiaEigenvalues`/`IwasawaDecomposition`): `attribute [local irreducible] Per.Acris Per.Bcris` (or `Per.Acris` alone). Notably, the sole file-scoped instance without `in` (`ExistsPowNorm.lean:86-87`) is directly followed by a single line `attribute [local irreducible] Per.Acris Per.Bcris` and then solely ordinary theorems (`homog_eq`, `untilt_zero`, `gauss_l`, etc.), verified directly from source.
+- **30 hits** (`IsCrisP.lean:49`, `AlgClosureTensorBcrisToBdRInjective.lean:67`, `ExistsPowNorm.lean:86`, etc. across 26 modules under `InertiaEigenvalues`/`IwasawaDecomposition`): `attribute [local irreducible] Per.Acris Per.Bcris` (or `Per.Acris` alone). The sole file-scoped instance without `in` (`ExistsPowNorm.lean:86-87`) is directly followed by a single line `attribute [local irreducible] Per.Acris Per.Bcris` and then solely ordinary theorems (`homog_eq`, `untilt_zero`, `gauss_l`, etc.), verified directly from source.
 - **1 hit** (`ExistsFormFamilyHypothesesChangedSecondNorm.lean:38-40`): `attribute [local irreducible] _root_.NumberField.RingOfIntegers _root_.CommRing.toCommSemiring _root_.NumberField.instCommRingRingOfIntegers _root_.AddCommGroup.toAddCommMonoid`.
 - **6 hits** (`AutomorphicInSphericalLevel.lean:218,315`, `CongLev.lean:177`, `EigGen.lean:154`, `FinOrbSubgroupOf.lean:213`, `LevUnion.lean:78`): `attribute [local irreducible] cv Kv Ov DX KD RP SA Lsq ...`.
 - **Kernel irrelevance**: The `irreducible` attribute is strictly an elaborator `Meta`-level transparency hint; the C++ kernel ignores `irreducible` attributes and checks definitional equality uniformly across all `def` declarations, so soundness cannot be affected.
 
-#### (3) Exhaustive Verification of All 31/31 `hygiene` Occurrences
+#### (3) Verification of All 31/31 `hygiene` Occurrences
 
 **All 31 occurrences use `set_option hygiene false in` (strictly scoped to a single declaration)**, targeting exclusively the following 3 constructs:
 - `local notation` — **22 hits** (e.g., `ExistsOrderTwoTranslateEvenCubicalBundle.lean:376-377` `local notation "𝔪" => ...`, `PNormalModelPlace.lean:174-189` `𝒜, ℬ, 𝒪, 𝒪̄, 𝒯, 𝒦, ℱ, 𝔏`, `PJoinDivCycle.lean:53-59` `ψ, ε`, `LocUnrSplit.lean:120-121` `𝟙`, etc. — allowing local notations to reference section variables directly).
@@ -385,7 +385,7 @@ Going beyond Round 1 sampling, this deep audit inspected directly from disk 100%
 - `scoped macro` — **1 hit** (`RingSpecNormalisedCharacterEq.lean:73-75` — `scoped macro "copy_cases " h:ident D:ident D':ident : tactic`).
 - **Kernel irrelevance**: Macro hygiene governs only identifier capture during parsing and macro expansion; the expanded final proof terms pass through the kernel typechecker identically to ordinary code.
 
-#### (4) Exhaustive Check of All 13/13 Other Non-Routine `set_option` Hits & All 33 Option Kinds (88,139 Total)
+#### (4) Check of All 13/13 Other Non-Routine `set_option` Hits & All 33 Option Kinds (88,139 Total)
 
 - `quotPrecheck false` — **7/7 hits**: All suppress syntax-quotation prechecking for `local notation` (`ExistsUniqueVectorFieldOfGlobalOneFormValues.lean:36`, `TwistedOrbitalSwapConvolution.lean:26,28`, `TuplesP.lean:1433`, `MeasFr.lean:90`, `MeasLev.lean:23`, `SatisfiesGlRelationsBilinearLeft.lean:43` — `local notation "D"`, `"Mx"` inside `section ops`).
 - `smartUnfolding false in` — **3/3 hits**: `ECure.lean:18`, `BuDefQEta.lean:123,136` — disables the elaborator's WHNF unfolding heuristic (kernel-irrelevant).
@@ -412,7 +412,7 @@ Cross-checking `Statements.lean` (`L1`: solely `import Mathlib`), `Main.lean` (`
 
 ---
 
-### 2.2 Exhaustive Edge-Case Audit of the Riemann Zeta Function $\zeta(s)$
+### 2.2 Edge-Case Audit of the Riemann Zeta Function $\zeta(s)$
 
 Verbatim `Statements.lean:3-4`:
 ```lean
@@ -452,7 +452,7 @@ def RiemannZetaZerosOnLine : Prop :=
 
 ---
 
-### 2.3 Exhaustive Edge-Case Audit of Dirichlet $L$-Functions $L(s, \chi)$ (GRH)
+### 2.3 Edge-Case Audit of Dirichlet $L$-Functions $L(s, \chi)$ (GRH)
 
 Verbatim `Statements.lean:6-16`:
 ```lean
@@ -513,7 +513,7 @@ def PrimitiveDirichletLZerosOnLine : Prop :=
   - Any imprimitive character $\chi \pmod N$ (in particular the principal character $\chi = 1_N$ for $N > 1$, where $q = 1 < N$) has, for every prime $p \mid N,\ p \nmid q$, an Euler factor $(1 - \chi^*(p)p^{-s})$ vanishing at
     $$s = \frac{i\bigl(\arg \chi^*(p) + 2\pi k\bigr)}{\log p} \quad (k \in \mathbb{Z}),$$
     producing **infinitely many extraneous zeros on the line $\operatorname{Re}(s) = 0$** (for $\chi = 1_N$, $s = 2\pi i k / \log p$).
-  - Furthermore, primitive even characters ($\chi \neq 1,\ \chi(-1) = 1$) also have a trivial zero at $s = 0$ due to the pole of $\Gamma_{\mathbb{R}}(s)$ at $s = 0$.
+  - Primitive even characters ($\chi \neq 1,\ \chi(-1) = 1$) also have a trivial zero at $s = 0$ due to the pole of $\Gamma_{\mathbb{R}}(s)$ at $s = 0$.
   - Hence strictly excluding $\operatorname{Re}(s) = 0$ via `0 < s.re` in `DirichletLZerosOnLine` (`Statements.lean:12`) and `PrimitiveDirichletLZerosOnLine` (`Statements.lean:16`) matches the classical GRH formulation **exactly**.
 - **$\operatorname{Re}(s) = 1$**:
   - Excluded from the critical-strip statements via `s.re < 1`, while nonvanishing on $\operatorname{Re}(s) = 1$ (except the simple pole of principal characters at $s = 1$) is already fully subsumed by `Main.LFunction_ne_zero_of_half_lt_re` ($\operatorname{Re}(s) > 1/2$).
@@ -548,7 +548,7 @@ Tracing `Main.lean`'s import hierarchy down to the leaves yields:
 
 **Complete Mathematical and Database Isolation Verification**:
 - All 4 `SmallClassNumbers` module names (`CorGKOf`, `ClassNumberThree`, `LenEqZeroIff`, `OnePoint`) are **pure ASCII strings**. Because the `index_lean.py:21` Unicode `₂` truncation bug identified in Round 1 drops edges only when `dst_module` contains `₂`, every `import` edge targeting these 4 modules across all 175,187 files (including all 394 Unicode `₂` modules) is recorded in DuckDB's `imports` table with 100% completeness.
-- Exhaustive DuckDB `imports` query results:
+- DuckDB `imports` query results:
   - Sole importer of `SmallClassNumbers.CorGKOf`: `['Supplements.Kernels.MainTheoremsAll']`
   - Sole importer of `SmallClassNumbers.LenEqZeroIff`: `['Supplements.Kernels.MainTheoremsCritical']`
   - Sole importer of `SmallClassNumbers.OnePoint`: `['Supplements.Kernels.MainTheoremsCritical']`
@@ -560,6 +560,6 @@ Tracing `Main.lean`'s import hierarchy down to the leaves yields:
 
 ## Part 3. Final Synthesis & Post-Audit Dynamic Verification Procedure
 
-1. **Zero Metaprogramming Blind Spots**: All instances of `CutCptCopy.lean` (`addDecl` ×2), `BuildAid/D1..D5` (`run_cmd`/`modifyEnv` ×5), repository-wide `elab` ×4 (`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), repository-wide `partial def` ×2 (`go`, `copyAt`), global `macro` 22/22, `allowUnsafeReducibility` 37/37, `hygiene` 31/31, and other non-routine `set_option` 13/13 were audited line-by-line from raw source, confirming zero kernel bypasses, zero axiom injections, and zero symbol shadowing.
+1. **Zero Metaprogramming Blind Spots**: All instances of `CutCptCopy.lean` (`addDecl` ×2), `BuildAid/D1..D5` (`run_cmd`/`modifyEnv` ×5), repository-wide `elab` ×4 (`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), repository-wide `partial def` ×2 (`go`, `copyAt`), global `macro` 22/22, `allowUnsafeReducibility` 37/37, `hygiene` 31/31, and other non-routine `set_option` 13/13 were audited line by line from raw source, confirming zero kernel bypasses, zero axiom injections, and zero symbol shadowing.
 2. **Zero Mathematical Edge-Case Blind Spots**: All 5 theorems in `Main.lean` (`riemannHypothesis`, `riemannZeta_eq_zero_re`, `LFunction_ne_zero_of_half_lt_re`, `LFunction_eq_zero_re`, `LFunction_eq_zero_re_of_isPrimitive`) match the classical definitions of RH and GRH 100%, including trivial zeros ($-2,-4,\dots$), explicit nonvanishing at $s=0$ (`riemannZeta_zero`), the pole at $s=1$, `[NeZero N]`, principal/non-principal branching (`χ ≠ 1 ∨ s ≠ 1`), Euler factor nonvanishing for imprimitive characters ($\operatorname{Re}(s) > 0$), boundary behavior on $\operatorname{Re}(s) = 0, 1$, and critical-strip equivalence of Mathlib `0df444a3`'s `DirichletCharacter.LFunction`. `SmallClassNumbers.CorGKOf` is completely isolated outside the `MainTheorems` cone.
 3. **Recommended Final Dynamic Kernel Certification**: Once the official `leanprover/lean4:v4.33.1` toolchain and Mathlib `0df444a360eaa60ab8c11dca51a86af692955474` cache are provisioned locally, run `lake build Main` and `#print axioms` on all 5 theorems to confirm dynamically that zero axioms appear outside the standard allowed set (`propext`, `Classical.choice`, `Quot.sound`).
