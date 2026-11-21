@@ -1,4 +1,4 @@
-# Track C — Task 3: Tactic Golfing Report for the #1 Longest Real Tactic Proof (`RingObjectsOfMatrixData`)
+# Shorter proof of `ring_objects_of_matrix_data`
 
 > **Language**: English ([한국어 원문](ko/tactic_golf_report.md))
 
@@ -31,7 +31,7 @@
 > [!NOTE]
 > Total file length shrinks only slightly (588L → 598L; net code 576L → 549L) because splitting a monolithic 477L tactic body into 16 top-level `private` declarations requires explicit typeclass and variable signature headers on each declaration. Conversely, every metric that actually drives Lean 4 kernel/elaborator `maxHeartbeats` dropped dramatically: **single-tactic-state body length (-53.9%, code -56.0%), concurrent `have` count (leading -44.6%, tokens -45.9%), and `by_cases` branches (-70.6%)**.
 >
-> **v2 Revision Notes (incorporating `@adversarial_critic` #32)**: At `mkRingInst` L357, the step that assumed definitional equality (`show ρπ ...`) for the abstract parameter `ρk` was replaced with propositional rewriting `rw [hρk, hρk, hsm, mul_smul]` and directly confirmed to pass the Lean `v4.34.1` kernel (`exit 0`). In addition, the `Subalgebra.adjoin` typo in the core harness and this report was corrected to the actual imported/original API `Algebra.adjoin`.
+> **v2 Revision Notes (incorporating review note #32)**: At `mkRingInst` L357, the step that assumed definitional equality (`show ρπ ...`) for the abstract parameter `ρk` was replaced with propositional rewriting `rw [hρk, hρk, hsm, mul_smul]` and directly confirmed to pass the Lean `v4.34.1` kernel (`exit 0`). In addition, the `Subalgebra.adjoin` typo in the core harness and this report was corrected to the actual imported/original API `Algebra.adjoin`.
 
 ### 1.2 Standalone Lean 4.34.1 Core Harness Compilation Verification
 
