@@ -1,32 +1,23 @@
-# 리만 가설(RH) & 일반화 리만 가설(GRH) Lean 4.33.1 증명 완전 해설서
+# Lean 4.33.1 RH·GRH 증명 노트
 
-> **작성자**: `@math_translator` (Track B — Round 2)  
 > **대상 코드베이스**: `../lean/src/` (175,187 모듈 / 17,374,215줄 / 1,061,425 선언, Lean `v4.33.1`, Mathlib rev `0df444a360eaa60ab8c11dca51a86af692955474`, `sorry` 0 / 사용자 `axiom` 0)  
-> **권장 독해 시간**: 20~30분 (Zoom 0 → Zoom 1 → Zoom 2 순차 열람)  
 > **함께 보기**: Levent Alpöge 발표문 9대 개념과의 정밀 대조표는 [rosetta_stone.md](rosetta_stone.md) 참조.
 
 ---
 
-## Zoom 0 — 3문장 직관 & 비유
+## 개요
 
-### 핵심 직관 (3문장)
+### 세 문장
 
 1. 리만 제타 함수나 디리클레 $L$-함수가 임계선 $\operatorname{Re}(s)=1/2$ 오른쪽에 영점을 가지면, 소수 거듭제곱의 가중합 $G_z(x) = \sum_{n \le x}\Lambda(n)(x/n-1)_+ - x\log x + (1+\gamma)x$ (및 순환 지표군 가중합 $\Lambda.\mathrm{Gm}(x)$)은 무한히 많은 승법 구간 $[Y, Y^\lambda]$에서 반드시 $x^{1/2+\delta}$를 뚫고 위로 진동해야 한다.
 2. 이 증명은 거대한 최대실 $2$-거듭제곱 원분체 탑 $E$ 위에서 **Behrend 3-AP-자유 집합**으로 프로베니우스 궤도 충돌을 걸러낸 뒤, 정칙·부정치 유니타리군 위의 **길이 $m \sim \sqrt{x}$ 반복 세타 올림 사슬**과 **Bessel 주기 사상**에 **Arakelov/Bost 앙상블 기울기 부등식**을 적용해 비분해 소수들의 가분성 총합을 주항과 오차로 위에서 덮는다.
 3. 이때 앙상블 기울기 부등식의 직교성 오차는 부정치 $U(p,q)$ **사영된 Bessel Poincaré 급수의 Hilbert–Schmidt 준직교성**으로 $e^{-x^{\varepsilon/8}}$까지 지수 소멸시키고, 산술 코호몰로지 오차는 $U(3)$ 패칭으로 증명한 **약화된 Vandiver 창 상계(`VWin`)**로 봉쇄함으로써, 모든 창에서 $\Lambda.\mathrm{Gm}(x) \le x^{1/2 + O(\varepsilon)}$를 강제해 RH와 GRH를 무조건 닫는다.
 
-### 비유 — "정밀 공명 저울, $\sqrt{x}$단 세타 증폭기, Behrend 방진 필터"
-
-임계선 오른쪽의 비자명 영점은 소수 분포에 **거대한 진동($> x^{1/2+\delta}$)**을 남기는 숨겨진 진동원이다. 증명은 이 진동원이 존재할 수 없음을 보이기 위해 거대한 **Arakelov 저울(Bost 기울기 부등식)**을 세운다.
-- **저울의 왼쪽 접시(`LinkG_at`)**에는 비분해 소수들이 만들어내는 $p$-진 가분성(소수 거듭제곱의 합 `ASK`)을 올려놓는다. 소수들이 서로 다른 원분체 자리에서 겹쳐 공명(간섭)하면 측정이 망가지므로, 원분체 탑의 갈루아 군 위에 **Behrend 방진 필터(`BehrendSets`)**를 깔아 어떤 궤도 창에서도 충돌이 최대 2번(`WindowTwo`)만 일어나게 걸러낸다.
-- **저울의 오른쪽 접시(`LinkDIV_at`)**에는 Bessel 평가사상의 Arakelov 높이(`MAIN`)를 올려놓는다. 저울 눈금을 $x^{1/2}$ 정밀도까지 맞추기 위해 단일 보형 형식이 아니라 **길이 $m \sim \sqrt{x}$짜리 반복 세타 증폭기(`ColumnChain` / `Unf.Chain`)**를 거쳐 오차 항 $x/m$과 $m$이 정확히 $\sqrt{x}$에서 균형을 이루게 설계한다.
-- 마지막으로 저울의 영점 오차를 잡는 두 개의 안정기가 작동한다. 해석적 흔들림(사상들이 서로 비스듬히 겹치는 오차)은 $U(p,q)$ **사영 Poincaré 급수의 준직교성(`PoincareInHH`, `WuDecayOfGap`, `LinkS_at`)**이 지수적으로 제거하고, 대수적 누수(고차 에탈 코호몰로지·유군 비틀림)는 $U(3)$ 패칭으로 증명한 **약화된 Vandiver 상계(`VWin`, `HVCore`)**가 차단한다. 저울이 기울어지지 않으므로 $G_z(x) \le x^{1/2+O(\varepsilon)}$가 강제되고, 임계선 오른쪽에는 영점이 설 자리가 사라진다.
-
 ---
 
-## Zoom 1 — 1페이지 아키텍처
+## 배치
 
-### 전체 의존성 및 4대 기둥 합류도
+### 의존 관계
 
 ```mermaid
 flowchart TD
@@ -114,7 +105,7 @@ $$\begin{aligned}
 
 ---
 
-## Zoom 2 — 핵심 척추 정리 18선 정밀 번역
+## 정리 18개
 
 아래 18개 정리는 `Main.riemannHypothesis`에서 시작하여 증명 트리의 바닥 기둥(`RowSrc`, `RecTExists`, `HVCore`, `PoincareInHH`, `BehrendSets`)까지 이어지는 **완전 검증 척추**이다. 각 항목은 실제 Lean 타입 시그니처와 1:1로 일치하며, 명세(`def : Prop`)와 증명 정리(`theorem`)를 엄격히 구분해 표기한다.
 
@@ -376,9 +367,9 @@ $$\begin{aligned}
 
 ---
 
-## 부록 — 175,187개 모듈이 실제로 하는 일 (독자용 지도)
+## 부록 — 175,187개 모듈
 
-위 18개 척추 정리만 읽으면 증명의 논리적 인과가 100% 보이지만, 실제 레포지토리가 175,187개 모듈(1,737만 줄)에 달하는 이유는 Mathlib에 없는 현대 정수론·보형표현·산술기하 인프라를 **공리 0개로 전부 밑바닥부터 자체 증명**했기 때문이다:
+위 18개 정리가 RH/GRH 논증이다. 나머지 175,187개 모듈(1,737만 줄)은 Mathlib에 없는 정수론, 보형형식, 산술기하이다. 트리가 적는 사용자 공리는 0개이다:
 
 1. **`Development` (141,928모듈, 81%)**: 최상위 조립(`MainConclusion`, `VwinOfRow`, `RowSrc`, `SmallClassNumbers`)과 `EveryCharacterOfLiteratureOfVWin`의 195개 문헌 정리(내부 ~190+)의 실제 증명 창고 — `AbelianVarietyTheory`(98.8k: `DivisorProofs`, `InertiaEigenvalues`, `IwasawaDecomposition` $G=NAK$, `TwistedOperators`, `DecoratedLatticeProofs`, `FlagMeasures`, `SatakeParameters`, `GlobalInterpolation`), `AutomorphicArithmetic`(18.4k), `AutomorphicSpectrum`(15.1k), `WeilBound`(7.1k), `EtaleCohomology`(1.4k), `ResolutionOfSingularities`(499).
 2. **`Formalism` (18,254모듈)**: 본 해설서의 핵심 부등식·명세 코어 — `LocalToGlobal`(5.5k: `SiegelLatticeTheory`/`PoincareInHH`/`GL1..GL6`), `PeriodIntegrals`(4.4k: `BesselMapUniq`, `UnitaryGroupMassFormula`), `SharpRestriction`(3.1k: `GlobalTheoremInputs`, `CuspSpanNormBounds`, `GrowthBounds`), `HermitianCurvature`(1.9k), `GL3MeanSquares`(440), `ThetaLogCoordinates`(292), `WachLatticeTwists`(262), `HarderNarasimhan`(43), `BehrendSets`(14).
