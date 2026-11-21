@@ -1,10 +1,10 @@
 # Riemann Hypothesis Lean Dissection
 
-This repository contains the static analysis, standalone Lean harnesses, and refactoring experiments for Levent Alpöge's published Lean 4 formalization of the Riemann Hypothesis and its generalization to Dirichlet L-functions.
+Static analysis, standalone Lean harnesses, and refactoring experiments for Levent Alpöge's published Lean 4 formalization of the Riemann Hypothesis and of Dirichlet L-functions.
 
 - [Original release announcement](https://alpo.ge/remark.pdf) and [source mirror](https://github.com/leanprover-community/riemann-hypothesis).
 - [Andrew Sutherland's independent verification at MIT](https://math.mit.edu/~drew/grh/).
-- [Haejoe's walkthrough of the 17-million-line source tree](https://haejoe.com/column/riemann-hypothesis-lean-17m-lines-dissection).
+- [Haejoe's walkthrough of the 17-million-line source tree](https://haejoe.com/en/column/riemann-hypothesis-lean-17m-lines-dissection) ([한국어](https://haejoe.com/column/riemann-hypothesis-lean-17m-lines-dissection)).
 
 ## Verification scope
 
