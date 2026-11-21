@@ -1,9 +1,9 @@
-# Round 2 최종 적대적 검수 게이트 및 SIGN-OFF 보고서 (Track D: `adversarial_critic`)
+# Round 2 RH/GRH 노트 검수
 
 - **검수 대상**: Lean 4.33.1 RH/GRH 리포지토리(`../lean/src/`, 175,187 모듈) Round 2 전 트랙 산출물
-  - **Track A (`@meta_auditor`)**: [meta_audit_verdict.md](meta_audit_verdict.md) (563L)
-  - **Track B (`@math_translator`)**: [rosetta_stone.md](rosetta_stone.md) (287L), [rh_proof_explained.md](rh_proof_explained.md) (386L)
-  - **Track C (`@refactor_eng`)**: [capelli_batch_report.md](capelli_batch_report.md) (115L), [unitary_dedup_plan.md](unitary_dedup_plan.md) (104L), [tactic_golf_report.md](tactic_golf_report.md) (103L), [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (1,639L), `capelli_shadow/` (82파일), [UnifiedSWeqOm.lean](../poc/UnifiedSWeqOm.lean) (251L), [golfed_RingObjectsOfMatrixData.lean](../poc/golfed_RingObjectsOfMatrixData.lean) (598L), 7개 단독 Lean `v4.34.1` 하네스
+  - **Track A (`audit`)**: [meta_audit_verdict.md](meta_audit_verdict.md) (563L)
+  - **Track B (`proof notes`)**: [rosetta_stone.md](rosetta_stone.md) (286L), [rh_proof_explained.md](rh_proof_explained.md) (377L)
+  - **Track C (`compression`)**: [capelli_batch_report.md](capelli_batch_report.md) (114L), [unitary_dedup_plan.md](unitary_dedup_plan.md) (104L), [tactic_golf_report.md](tactic_golf_report.md) (103L), [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (1,639L), `capelli_shadow/` (82파일), [UnifiedSWeqOm.lean](../poc/UnifiedSWeqOm.lean) (251L), [golfed_RingObjectsOfMatrixData.lean](../poc/golfed_RingObjectsOfMatrixData.lean) (598L), 7개 단독 Lean `v4.34.1` 하네스
 - **검수 도구 및 원시 증빙**:
   - [verify_round2.py](../scripts/verify_round2.py) (514L — Unicode 대응 DuckDB+디스크 참조 검증, 82파일 섀도우 감사, Lean `v4.34.1` 하네스 독립 컴파일, `RingObjectsOfMatrixData` 시그니처·무결성 검사)
   - [critic_sig_dump.txt](../out/critic_sig_dump.txt) (1,142L — Track B 18개 핵심 정리 원시 시그니처 덤프)
@@ -12,22 +12,21 @@
 
 ---
 
-## 0. 최종 판정 요약 (EXPLICIT SIGN-OFF)
+## 0. 검사
 
-| 트랙 | 담당 에이전트 | 검수 회차 | 발견 결함 → 수정 완료 | 자동 참조 정확도 (실제 리포 참조) | 단독 컴파일 / 구조 무결성 | 최종 판정 |
+| 트랙 | 노트 | 검수 회차 | 발견 결함 → 수정 완료 | 자동 참조 정확도 (실제 리포 참조) | 단독 컴파일 / 구조 무결성 | 최종 판정 |
 | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **Track A** | `@meta_auditor` | 1차 즉시 통과 | 0건 결함 | **257 / 257 (100.0%)** *(비리포 stdlib/구간 표기 22건 제외)* | `CutCptCopy`·`BuildAid/D1..D5`·4 `elab`·2 `partial def`·RH/GRH 경계조건 전수 대조 통과 | **SIGN-OFF** |
-| **Track B** | `@math_translator` | **v1 → v2 (1회 완결)** (`#26`→`#27`→`#28`) | **10건 적발 → 10/10 수정** | **`rosetta_stone.md` 433 / 433 (100.0%)** / **`rh_proof_explained.md` 336 / 336 (100.0%)** | 18개 핵심 정리 원시 시그니처 직접 교차검증 18/18 통과, 9대 개념 Anti-Fallacy 통과, Mermaid 유효 | **SIGN-OFF** |
-| **Track C** | `@refactor_eng` | **v1 → v2 (1회 완결)** (`#32`→`#33`) | **4건 적발 → 4/4 수정** *(치명 버그 3건 포함)* | **115 / 115 (100.0%)** *(Mathlib/제안모듈/변경이력 14건 제외)* | 82파일 섀도우 무결성(`0` leaks, `116` phantom 보존), `RingObjects` 시그니처 100% 일치·`mkRingInst` 수정 검증, **7/7 하네스 `exit 0`** | **SIGN-OFF** |
+| **Track A** | `audit` | 1차 즉시 통과 | 0건 결함 | **257 / 257 (100.0%)** *(비리포 stdlib/구간 표기 22건 제외)* | `CutCptCopy`·`BuildAid/D1..D5`·4 `elab`·2 `partial def`·RH/GRH 경계조건 대조 통과 | **통과** |
+| **Track B** | `proof notes` | **v1 → v2 (1회 완결)** (`#26`→`#27`→`#28`) | **10건 적발 → 10/10 수정** | **`rosetta_stone.md` 433 / 433 (100.0%)** / **`rh_proof_explained.md` 336 / 336 (100.0%)** | 18개 핵심 정리 원시 시그니처 직접 교차검증 18/18 통과, 9대 개념 이름 대조 통과, Mermaid 유효 | **통과** |
+| **Track C** | `compression` | **v1 → v2 (1회 완결)** (`#32`→`#33`) | **4건 적발 → 4/4 수정** *(치명 버그 3건 포함)* | **115 / 115 (100.0%)** *(Mathlib/제안모듈/변경이력 14건 제외)* | 82파일 섀도우 무결성(`0` leaks, `116` phantom 보존), `RingObjects` 시그니처 100% 일치·`mkRingInst` 수정 검증, **7/7 하네스 `exit 0`** | **통과** |
 
-> [!IMPORTANT]
-> **원본 불변성 검증 (`downloads/lean/src/` 무수정 확증)**: `capelli_shadow/` 대응 82개 원본 파일 + `Main.lean` + `RingObjectsOfMatrixData.lean` 등 핵심 84개 원본 파일의 mtime 전수 조사 결과 Round 2 시작 시점(`2026-11-21T06:30:00Z`) 이후 수정된 파일 **0건** (최신 mtime `2026-11-21T05:06:36Z`). 모든 산출물은 `downloads/lean-analysis/teamwork_out/round2/` 하위에만 격리 기록되었다.
+**원본 불변성 검증 (`downloads/lean/src/` 무수정 확증)**: `capelli_shadow/` 대응 82개 원본 파일 + `Main.lean` + `RingObjectsOfMatrixData.lean` 등 핵심 84개 원본 파일의 mtime 조사 결과 Round 2 시작 시점(`2026-11-21T06:30:00Z`) 이후 수정된 파일 **0건** (최신 mtime `2026-11-21T05:06:36Z`). 모든 산출물은 `downloads/lean-analysis/teamwork_out/round2/` 하위에만 격리 기록되었다.
 
 ---
 
 ## 1. 자동 검증 통합 지표 (`verify_round2.py` 독립 실행 결과)
 
-### 1.1 Markdown 산출물 전수 `Module.decl` · 파일 참조 검증표
+### 1.1 Markdown 산출물 `Module.decl` · 파일 참조 검증표
 
 | 대상 산출물 | 총 검사 토큰 | 스크립트 PASS | WARN | 스크립트 FAIL (비리포/파서 아티팩트 내역) | **실제 리포 참조 정확도** |
 | :--- | ---: | ---: | ---: | :--- | :---: |
@@ -39,7 +38,7 @@
 | `round2/compression/tactic_golf_report.md` (v2) | 24 | 22 | 0 | 2건 전부 비리포(v2 오기 교정 이력 문장 내 `Subalgebra.adjoin` 1건, 실제 Mathlib 보조정리 `Fintype.card_pos_iff.mp` 1건) | **22 / 22 (100.0%)** |
 | **전 트랙 합계** | **1,177** | **1,141** | **0** | **실제 리포 참조 오류 0건** | **1,141 / 1,141 (100.0%)** |
 
-### 1.2 독립 Lean `v4.34.1` 하네스 전수 재컴파일 결과 (`elan run leanprover/lean4:v4.34.1 lean`)
+### 1.2 독립 Lean `v4.34.1` 하네스 재컴파일 결과 (`elan run leanprover/lean4:v4.34.1 lean`)
 
 | # | 하네스 / PoC 파일 | 줄 수 | 컴파일러 실행 | 종료 코드 | `sorry` / `axiom` / `admit` / `unsafe` | 검증 내용 |
 | ---: | :--- | ---: | :---: | :---: | :---: | :--- |
@@ -55,7 +54,7 @@
 
 ---
 
-## 2. Track A (`@meta_auditor`) 독립 대조 감사 요약
+## 2. Track A (`audit`) 독립 대조 감사 요약
 
 [meta_audit_verdict.md](meta_audit_verdict.md)의 모든 핵심 주장을 `downloads/lean/src/` 원시 소스, `lean_index.duckdb`, 그리고 로컬 Lean 4 stdlib 소스(`../lean-toolchain/src/lean/Lean/{AddDecl,Environment,LibrarySuggestions/Basic}.lean`)와 직접 대조한 결과 **결함 0건**으로 1차 검증을 통과했다:
 
@@ -63,23 +62,23 @@
    - 원시 소스 91줄 직접 확인: `addDecl (.defnDecl ...)` 및 `addDecl (.thmDecl ...)` 호출이 모두 `Lean.addDecl` → `Environment.addDeclCore` → C++ 커널 `lean_add_decl`을 경유한다. 리포지토리 전역 `debug.skipKernelTC = 0`, `addDeclWithoutChecking = 0`.
    - `partial def go`는 컴파일 타임 메타 `Expr` 치환기이며 커널에 제출되는 결과 항(`value`)에는 포함되지 않는다.
    - `CutMainCpt.lean:475, 944-945`에서 `cpt_copy_thms`로 생성된 `block_growth_bound_of_compact_coefCpt`가 `FinalS.lean:60-61`에서 실제 소비됨을 원시 확인.
-2. **`BuildAid/D1..D5.lean` 전수 확인 (무해한 검색 거부 목록)**:
+2. **`BuildAid/D1..D5.lean` 확인 (무해한 검색 거부 목록)**:
    - 5개 파일 전부 정확히 4줄 구조(`initialize Lean.LibrarySuggestions.nameDenyListExt.addEntry ...`)로 `grind`/라이브러리 제안 필터링에만 작용하며 논리적 공리·커널 상태에 0% 영향.
    - 임포터 수(3 / 4 / 25 / 5 / 1) 및 `Main` 기준 최단 깊이(13 / 12 / 8 / 8 / 19)와 `MainTheorems` 기준 최단 깊이(12 / 11 / 5 / 6 / 18)가 DuckDB 조회와 100% 일치.
 3. **전체 메타·옵션 인벤토리 대조**:
    - 4개 `elab`(`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), 2개 `partial def`(`go`, `copyAt`), 22개 전역 `macro`(`NegOnePowBoundaryTermsCancel:114`, `RttUpperRelationsFromDescent:30`, `Theta1:25` 스팟 대조), 37건 `allowUnsafeReducibility`, 31건 `hygiene`, 13건 기타 특수 `set_option` 전부 원시 코드와 일치하며 커널 건전성 위반 0건.
-4. **RH / GRH 명제 경계조건 전수 감사 (`Statements.lean`, `Main.lean`, `CritLine.lean`, `RhOfRight.lean`, `ClaimStrip.lean`, `EveryCharacter.lean`, `Imprimitive.lean`, `HalfPlane.lean`, `poleData.lean:196`, `CharFamilyLFunctionNeZeroOfOneLeRe.lean:17-20`, `PrimePairSizeCondition.lean:19`, `RiemannHypothesisOfEveryCharacter.lean:219`)**:
+4. **RH / GRH 명제 경계조건 감사 (`Statements.lean`, `Main.lean`, `CritLine.lean`, `RhOfRight.lean`, `ClaimStrip.lean`, `EveryCharacter.lean`, `Imprimitive.lean`, `HalfPlane.lean`, `poleData.lean:196`, `CharFamilyLFunctionNeZeroOfOneLeRe.lean:17-20`, `PrimePairSizeCondition.lean:19`, `RiemannHypothesisOfEveryCharacter.lean:219`)**:
    - 자명영점 $s = -2(n+1)$ 배제, $s = 0$의 비영성(`riemannZeta_zero` 경유 3개 경로 전부 증명), $s = 1$ 극점 처리 및 `Imprimitive.lean:10-20` 대 `ZeroFreeAll`의 미묘한 차이(비원시 주지표 $N>1$의 오일러 인자 비영성 $\operatorname{Re}(s)>0$, `[NeZero N]`), 경계선 $\operatorname{Re}(s)=0, 1$ 처리, 임계대 점별 동치성 모두 누락 없이 정확히 기술됨.
 5. **`SmallClassNumbers` 8모듈 콘 격리 검증**:
    - DuckDB ASCII 콘 차집합(`Main` − `MainTheorems`) = 정확히 8모듈(`Main`, `Statements`, `MainTheoremsAll`, `MainTheoremsCritical` + `SmallClassNumbers.{CorGKOf, ClassNumberThree, LenEqZeroIff, OnePoint}`); Unicode 포함 전체 콘에서도 `175,187 - 175,179 = 8`로 완전 일치.
 
 ---
 
-## 3. Track B (`@math_translator`) 18개 핵심 정리 원시 시그니처 교차검증 및 v1→v2 수정 감사
+## 3. Track B (`proof notes`) 18개 핵심 정리 원시 시그니처 교차검증 및 v1→v2 수정 감사
 
 ### 3.1 18개 핵심 정리 원시 Lean 시그니처 직접 교차검증표 (`>=10` 요건 대폭 초과)
 
-모든 18개 선언의 원시 타입 시그니처를 `downloads/lean/src/`에서 직접 읽어([critic_sig_dump.txt](../out/critic_sig_dump.txt) 및 직접 열람 파일) 산문 번역에서 **가설 밀반입(smuggling)** 또는 **필수 조건 누락(dropping)** 이 없는지 v1·v2 양쪽에서 전수 검사했다.
+모든 18개 선언의 원시 타입 시그니처를 `downloads/lean/src/`에서 직접 읽어([critic_sig_dump.txt](../out/critic_sig_dump.txt) 및 직접 열람 파일) 산문 번역에서 **가설 밀반입(smuggling)** 또는 **필수 조건 누락(dropping)** 이 없는지 v1·v2 양쪽에서 검사했다.
 
 | # | Lean 선언 (모듈 · 원시 행) | 핵심 원시 시그니처 검증 포인트 | v1 적발 결함 (`#26`) | v2 재검증 결과 (`#27`→`#28`) |
 | ---: | :--- | :--- | :--- | :---: |
@@ -102,16 +101,16 @@
 | 17 | `GlobalTheory.Unf.Chain` & `Row0b`/`PropsB` (`IsThetaFam.lean:149-205`, `RowSrc.lean:6`, `WeightsConjBis.lean:55-73`) | 귀납 체인 `Chain.{last, step}` + `Row0b`/`PropsB` 6개 필드(`weights` 포함) | **결함 #10**: `PropsB` 필드 목록에서 `weights` 누락 | **FIXED & PASS** (6/6 필드 완비) |
 | 18 | `weighted_von_mangoldt_sum_identity` & `meanSqK` & `recTExists` (`WeightedVonMangoldtSumIdentity.lean:227`, `meanSqK.lean:51`, `RecTExists.lean:20`) | `0 < a`, `0 < w`, `⌊a/w⌋₊ ≤ M`; `meanSqK` 소인수 분기 `≤ Y^(ε/5) ∨ (Y^K)^400 < p`; `recTExists` 12필드 완결 | **결함 #8** *(연관)*: `O2` 모듈 수 오기(`10` → DuckDB 정확치 `4` 대소문자구분 / `5` 비구분 `Two2`) 및 `GL5LogLValueBoundByZeta` 선언 감사 보강 | **FIXED & PASS** (정확 계수 + 선언 감사 추가) |
 
-### 3.2 9대 Rosetta Stone Anti-Fallacy 감사 판정
+### 3.2 아홉 가지 이름 대조
 
-- **키워드-부재 오류("keyword absent = concept absent") 전수 차단 통과**:
+- **키워드-부재 오류("keyword absent = concept absent") 차단 통과**:
   - Round 1의 키워드 검색 0건 오판을 실제 Lean `def`/`theorem` 시그니처 분석으로 정면 번복한 **⑦ Bost (기울기 부등식)** (`Formalism.HN.{muDef, TheoremF, TheoremFSharp}` + `MeanBoundSecondForm`) 및 **⑨ Weak Vandiver / Lichtenbaum $H^1$/$H^2$** (`Formalism.GaloisCohomology.{Sha, shaLen, VLen, PTCoker, PTSha}` + `UpperTheory.Top.{VVle, VWin}`) 매핑은 원시 코드와 100% 정합하다.
   - `GL1..GL6`(`Formalism.LocalToGlobal.GlobalTheory.*`)이 $\mathrm{GL}_5$ 6중 덮개가 아닌 **Global Lemma/Layer** 계층이며 `GL5`는 `GenusMassVolumes`(유니타리 Siegel–Weil 질량비)임을 파일·선언 단위(`GL5LogLValueBoundByZeta` 포함)로 입증했다.
   - 9개 항목 전부 원시 코드 근거 없는 추측이 없으며, `rh_proof_explained.md`의 전체 의존성 Mermaid `flowchart TD` 문법도 유효하다.
 
 ---
 
-## 4. Track C (`@refactor_eng`) 6-샘플 섀도우 딥-디프 감사, `RingObjects` 무결성 및 v1→v2 수정 루프
+## 4. Track C (`compression`) 6-샘플 섀도우 딥-디프 감사, `RingObjects` 무결성 및 v1→v2 수정 루프
 
 ### 4.1 `capelli_shadow/` 6-샘플 딥-디프 및 버그 수정 대상 파일 감사표 (5-샘플 요건 초과)
 
@@ -124,12 +123,12 @@
 | 5 | `FreeModuleQuotient.lean` | `2,516L → 91L` (-96.4%) / `207,153 → 4,392B` / `@: 4,159 → 0` | 없음 | `aux` 81줄 증명 원문 보존, `freeN_quot` 시그니처 `@` 100% 제거에도 바인더·`⧸` 몫모듈 노테이션 무결 | **PASS** |
 | 6 | `HloweqTransfer.lean` (`Re4`) | `3,658L → 217L` (-94.1%) / `282,214 → 26,224B` / `@: 3,585 → 194` | **치명 버그 #1**: `ContinuousLinearMap` 13-인자 오프바이원(`args[9]` 사용)으로 12개 `→L[Complex]` 공역이 `@UniformSpace.toTopologicalSpace ...`로 파손 | `args[8]` 교정 후 13/13 `→L[Complex]` 전부 `(L2 ε) →L[Complex] (L2 ε)` / `H →L[Complex] H` 정상 출력, 누수 0건 | **FIXED & PASS** |
 | 7* | `ComplexNormedInstanceCompat.lean` (`Re3`) | `3,669L → 228L` (-93.8%) / `283,079 → 27,089B` / `@: 3,584 → 193` | **치명 버그 #1**: 동일 오프바이원 12개소 | 13/13 `→L[Complex]` 전부 정상 복구, 누수 0건 | **FIXED & PASS** |
-| 8* | `SelectionLemmas.lean` | `3,547L → 390L` (-89.0%) / `252,719 → 31,813B` / `@: 5,343 → 254` | **치명 버그 #2**: `hcompl` 1회·`loc` 2회 `{K}` 팬텀 암묵 바인더 탈락 | `hcompl (K := K)` (L111), `loc (K := K)` (L120 ×2) 전수 복구 | **FIXED & PASS** |
+| 8* | `SelectionLemmas.lean` | `3,547L → 390L` (-89.0%) / `252,719 → 31,813B` / `@: 5,343 → 254` | **치명 버그 #2**: `hcompl` 1회·`loc` 2회 `{K}` 팬텀 암묵 바인더 탈락 | `hcompl (K := K)` (L111), `loc (K := K)` (L120 ×2) 복구 | **FIXED & PASS** |
 | 9* | `SquareOfApproximation.lean` | `658L → 246L` (-62.6%) / `43,667 → 15,839B` / `@: 617 → 46` | **치명 버그 #2**: `IsSplit` 1회 `{E}` 팬텀 암묵 바인더 탈락 | `IsSplit (E := E) v` (L241–242) 복구 | **FIXED & PASS** |
 
 - **전체 82개 파일 일괄 검증 (`verify_round2.py --capelli-shadow` + `capelli_batch_manifest.json` 대조)**:
   - 총 `75,221L → 13,612L (-61,609L, -81.90%)`, LF 기준 `5,825,527B → 1,008,203B (-4,817,324B, -82.69%)` *(Windows CRLF 디스크 파일 크기 합은 `1,021,815B = +13,612B`, 줄당 1바이트 차이로 정상)*, `@` 토큰 `96,892 → 5,314`, `@`-라인 `58,365 → 2,498`.
-  - 선언명 보존 **`1,542 / 1,542` (100%)**, 괄호 균형 **`82 / 82` (100%)**, 금지 토큰(`sorry`/`axiom`/`admit`/`unsafe`/`native_decide`) **0건**, `notation_instance_leaks` **0건** (`check_notation_instance_leaks()` 가드 내장 확인), `phantom_named_preserved = 116` (전수 스캔 시 의심/인스턴스 오삽입 **0건**), 수동 `@` 31개 파일 **0바이트 무변경 보존**.
+  - 선언명 보존 **`1,542 / 1,542` (100%)**, 괄호 균형 **`82 / 82` (100%)**, 금지 토큰(`sorry`/`axiom`/`admit`/`unsafe`/`native_decide`) **0건**, `notation_instance_leaks` **0건** (`check_notation_instance_leaks()` 가드 내장 확인), `phantom_named_preserved = 116` (스캔 시 의심/인스턴스 오삽입 **0건**), 수동 `@` 31개 파일 **0바이트 무변경 보존**.
 
 ### 4.2 `golfed_RingObjectsOfMatrixData.lean` 명제 동치성 및 택틱 무결성 판정
 
@@ -159,16 +158,16 @@
 
 | 트랙 | 피드백 보드 번호 | 수정 보고 번호 | 수정 완료 항목 요약 | 재검증 상태 |
 | :--- | :---: | :---: | :--- | :---: |
-| **Track A** (`@meta_auditor`) | — | `#24` | 1차 감사에서 원시 코드·stdlib·DuckDB 전수 대조 결함 0건 | **1차 PASS → SIGN-OFF** |
-| **Track B** (`@math_translator`) | `#26` | `#27` | 10/10 결함 전수 수정: `level_of_tiedWin` `eD,eL∈ℝ`, `WindowTwo`/`OrbitOne` 귀속, `SizesTextAt` 상하한 분리, `TheoremF` 블록 결합·`MeanBoundSecondForm` `Nonempty U0`, `LinkDIV_at`/`LinkG_at`/`LinkS` 누락항·`1≤C0` 분리, `BesselMapUniq`/`PoincareSetting.Pu`/`WuDecayOfGap` 전제·위치 분리, `VVle` `shaLen≠⊤` 및 `SmallClassNumbers` 전제, `O2` 계수(`4`/`5`)·`GL5LogLValueBoundByZeta`, `rallis_inner_product_big_theta_lift` 존재양화사, `PropsB`의 `weights` 필드 추가 | **재검증 100% PASS (`#28`) → SIGN-OFF** |
-| **Track C** (`@refactor_eng`) | `#32` | `#33` | 4/4 항목 전수 수정: (1) `ContinuousLinearMap` 13-인자 오프바이원(`args[9]→args[8]`) 수정 + `check_notation_instance_leaks()` 가드 도입(`0/82` 누수), (2) 팬텀 암묵 바인더 전이적 추론 가능성 고정점 보존(`phantom_named_preserved=116`, `KwF` 36/36·`hcompl`/`loc` 3/3·`IsSplit` 1/1), (3) `golfed_RingObjectsOfMatrixData.lean:357` `mkRingInst` defeq 버그를 `rw [hρk, hρk, hsm, mul_smul]`으로 교정(`v4.34.1 exit 0`), (4) `Subalgebra.adjoin → Algebra.adjoin` 및 `UnifiedSWeqOm.lean` (`251L`/`187L`)·`tactic_golf_report.md` 지표 전수 동기화 | **재검증 100% PASS (7/7 하네스 `exit 0`) → SIGN-OFF** |
+| **Track A** (`audit`) | — | `#24` | 1차 감사에서 원시 코드·stdlib·DuckDB 대조 결함 0건 | **1차 PASS → 통과** |
+| **Track B** (`proof notes`) | `#26` | `#27` | 10/10 결함 수정: `level_of_tiedWin` `eD,eL∈ℝ`, `WindowTwo`/`OrbitOne` 귀속, `SizesTextAt` 상하한 분리, `TheoremF` 블록 결합·`MeanBoundSecondForm` `Nonempty U0`, `LinkDIV_at`/`LinkG_at`/`LinkS` 누락항·`1≤C0` 분리, `BesselMapUniq`/`PoincareSetting.Pu`/`WuDecayOfGap` 전제·위치 분리, `VVle` `shaLen≠⊤` 및 `SmallClassNumbers` 전제, `O2` 계수(`4`/`5`)·`GL5LogLValueBoundByZeta`, `rallis_inner_product_big_theta_lift` 존재양화사, `PropsB`의 `weights` 필드 추가 | **재검증 100% PASS (`#28`) → 통과** |
+| **Track C** (`compression`) | `#32` | `#33` | 4/4 항목 수정: (1) `ContinuousLinearMap` 13-인자 오프바이원(`args[9]→args[8]`) 수정 + `check_notation_instance_leaks()` 가드 도입(`0/82` 누수), (2) 팬텀 암묵 바인더 전이적 추론 가능성 고정점 보존(`phantom_named_preserved=116`, `KwF` 36/36·`hcompl`/`loc` 3/3·`IsSplit` 1/1), (3) `golfed_RingObjectsOfMatrixData.lean:357` `mkRingInst` defeq 버그를 `rw [hρk, hρk, hsm, mul_smul]`으로 교정(`v4.34.1 exit 0`), (4) `Subalgebra.adjoin → Algebra.adjoin` 및 `UnifiedSWeqOm.lean` (`251L`/`187L`)·`tactic_golf_report.md` 지표 동기화 | **재검증 100% PASS (7/7 하네스 `exit 0`) → 통과** |
 
 ---
 
-## 6. 최종 승인 선언 (FINAL SIGN-OFF)
+## 6. 확인한 것
 
-본 적대적 검수 게이트(`adversarial_critic`)는 Round 2 전 트랙의 자동 검증, 원시 시그니처 직접 대조, 섀도우 딥-디프, 독립 Lean `v4.34.1` 재컴파일, 그리고 Track B·C의 완전 수정–재검증 루프를 모두 종료하였으며 아래 3개 트랙 전원에 대해 공식 **SIGN-OFF**를 발급한다:
+`verify_round2.py`, 시그니처 덤프, 섀도우 diff, Lean v4.34.1 재컴파일을 이 노트들에 돌렸다. 증명 노트와 압축 노트는 한 번 고친 뒤 다시 확인했다.
 
-- **Track A (`@meta_auditor`)**: **APPROVED / SIGN-OFF**
-- **Track B (`@math_translator`)**: **APPROVED / SIGN-OFF**
-- **Track C (`@refactor_eng`)**: **APPROVED / SIGN-OFF**
+- 감사 (`meta_audit_verdict.md`): 통과
+- 증명 노트 (`rosetta_stone.md`, `rh_proof_explained.md`): 통과
+- 압축 (`capelli_batch_report.md`, `unitary_dedup_plan.md`, `tactic_golf_report.md`): 통과
