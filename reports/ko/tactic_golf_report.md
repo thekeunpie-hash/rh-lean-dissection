@@ -1,4 +1,4 @@
-# Track C — Task 3: 실제 최장 택틱 증명 1위 (`RingObjectsOfMatrixData`) 골프링 보고서
+# `ring_objects_of_matrix_data` 증명을 줄인 기록
 
 - **원본 대상**: [RingObjectsOfMatrixData.lean](../lean/src/Formalism/WachLatticeTwists/RamifiedBlockRings/RamifiedBlockProofs/RingObjectsOfMatrixData.lean) (`Formalism.RepresentationBoundsCohomology.ringDataObjects.ring_objects_of_matrix_data`, L109–588, `set_option maxHeartbeats 8000000`)
 - **Round 1 스텁 입력**: [stub_RingObjectsOfMatrixData.lean](../out/poc_golfing/stub_RingObjectsOfMatrixData.lean)
@@ -29,7 +29,7 @@
 > [!NOTE]
 > 파일 전체 줄 수(588L → 598L, 순 코드 576L → 549L)가 소폭만 줄어든 이유는, 거대 단일 택틱 본문(477L)을 16개의 `private` 최상위 선언으로 분리할 때 각 선언마다 독립적인 타입클래스·변수 시그니처 헤더가 명시되기 때문이다. 반면 Lean 4 커널/엘라보레이터의 `maxHeartbeats`를 결정짓는 핵심 지표인 **단일 택틱 상태의 본문 길이(-53.9%, 코드 -56.0%), 동시 `have` 수(선두 -44.6%, 토큰 -45.9%), `by_cases` 분기 수(-70.6%)** 가 대폭 축소되었다.
 >
-> **v2 수정 내역 (`@adversarial_critic` #32 반영)**: `mkRingInst` L357에서 추상 파라미터 `ρk`를 정의적 동치(`show ρπ ...`)로 가정하던 부분을 명제적 등식 치환 `rw [hρk, hρk, hsm, mul_smul]`으로 수정하고 Lean `v4.34.1`에서 해당 패턴의 커널 통과(`exit 0`)를 직접 확인했다. 또한 코어 하네스 및 본 보고서의 `Subalgebra.adjoin` 오기를 실제 임포트/원본 API인 `Algebra.adjoin`으로 교정했다.
+> **v2 수정 내역 (검수 메모 #32 반영)**: `mkRingInst` L357에서 추상 파라미터 `ρk`를 정의적 동치(`show ρπ ...`)로 가정하던 부분을 명제적 등식 치환 `rw [hρk, hρk, hsm, mul_smul]`으로 수정하고 Lean `v4.34.1`에서 해당 패턴의 커널 통과(`exit 0`)를 직접 확인했다. 또한 코어 하네스 및 본 보고서의 `Subalgebra.adjoin` 오기를 실제 임포트/원본 API인 `Algebra.adjoin`으로 교정했다.
 
 ### 1.2 Lean 4.34.1 단독 코어 하네스 컴파일 검증 완료치
 
