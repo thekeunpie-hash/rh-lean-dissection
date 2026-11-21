@@ -1,0 +1,12 @@
+/lean/
+/out/
+/_tsv/
+**/__pycache__/
+.venv/
+.lake/
+*.duckdb
+*.duckdb.wal
+*.tsv
+*.pyc
+*.olean
+*.ilean
