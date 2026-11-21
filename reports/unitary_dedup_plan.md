@@ -1,4 +1,4 @@
-# Track C — Task 2: Unification Blueprint for the `UnitaryGroupMassFormula` 3-Way Directory Clones
+# Three copies of `UnitaryGroupMassFormula`
 
 > **Language**: English ([한국어 원문](ko/unitary_dedup_plan.md))
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 1. Exhaustive Quantitative Inventory of the 3 Target Directories
+## 1. Counts for the 3 directories
 
 Querying `lean_index.duckdb` shows that the 3 subdirectories under `Formalism.PeriodIntegrals.UnitaryGroupMassFormula.*` span **448 modules / 57,658 lines / 2,812,506 bytes**, with **143 filenames appearing across all three directories (triplets)**.
 
@@ -21,7 +21,7 @@ Querying `lean_index.duckdb` shows that the 3 subdirectories under `Formalism.Pe
 
 ---
 
-## 2. Exhaustive Similarity Distribution & Pairwise Cloning Structure Across the 143 Triplets
+## 2. How alike the 143 triplets are
 
 Looking only at 3-way minimum normalized similarity (`norm_min`) makes 40 triplets appear `divergent (<50%)`. However, decomposing into the **3 pairs `(Orbit–Stab, Orbit–Weil, Stab–Weil)`** and cross-checking declaration-name sets in DuckDB reveals a far more decisive structure:
 
@@ -36,7 +36,7 @@ Looking only at 3-way minimum normalized similarity (`norm_min`) makes 40 triple
 | **`divergent_lt50` (< 50%)** | **40** | 18,543L | **11,624L** | `LocDensHF` [401/408/408], `LocDensHH` [396/379/396], `DensGen` [286/263/256], `LocDensCntQ` [125/147/125] |
 | **Total** | **143** | **55,593L** | **36,090L** | — |
 
-### 2.2 Pairwise 100% Identity & Declaration-Name Set Cross-Check (Key Structural Discovery)
+### 2.2 Pairwise identity and declaration-name sets
 
 | Pairwise / Declaration-Match Category | Triplets | Share (of 143) | Structural Cause |
 | :--- | ---: | ---: | :--- |
@@ -62,7 +62,7 @@ Direct diff inspection of the representative context modules (`StabilizerOrbitVo
 | **Axis 2: Archimedean Test-Function Regularity (`archExtra Φinf`)** | `True` (`IsAdm`: `Continuous ∧ HasCompactSupport`) | **`IsSmoothCc F E Φinf`** (`IsAdmS`: `IsAdm ∧ IsSmoothCc`, forgetful map `IsAdmS.adm`) | `True` (`IsAdm`: `Continuous ∧ HasCompactSupport`) | `VolStabFromSWS.lean:39-50`, `SWeqOm.lean:47-49` (`hsm` added), `PosTest.lean:36` (`hadm.adm`), `ExChar.lean:27` (`isSmoothCc_empty`), `VolStabFromSWOf.lean:32` |
 | **Axis 3: Analytic Siegel–Weil Input Hypothesis (`swInput F E σ M J`)** | **`SWc1 F E σ M J`** (Siegel–Weil in range `a + 2 ≤ M`) | **`StabilizerFirstChernCompatibility F E σ M J`** (Siegel–Weil restricted to `2 * a < M`, `IsSmoothCc`, via `SiegelWeilNarrowOfWide`) | **`SWc1W F E σ M J`** (`RapidDecay` Siegel–Weil in range `2 * a < M`) | `FibInfEx.lean:16`, `VolStabFromSWS.lean:19`, `VolStabFromSWW.lean:16-38, 47`; all three hypotheses feed into the identical adelic theta-average Euler product identity (`sw_eval`) |
 
-### Monotonic Hierarchy (Core Mathematical Insight)
+### Monotonic hierarchy
 - Whenever `1 ≤ a`, **`2 * a < M → a + 2 ≤ M`** always holds (1-line `omega` proof; equivalent to `3 ≤ M` when `a = 1`, and `2a + 1 ≥ a + 2` when `a ≥ 2`).
 - Consequently, the hypotheses weaken monotonically along **`SWc1 → SWc1W → StabilizerFirstChernCompatibility`** (equivalently, tightening the required input class / adjusting domain scope), and the three directories are literally **3 full copy-pasted instantiations of the exact same adelic orbital-integral, local-density, and Siegel–Weil decomposition proof pipeline** specialized to `cfgOrbit`, `cfgStab`, and `cfgWeil`.
 
