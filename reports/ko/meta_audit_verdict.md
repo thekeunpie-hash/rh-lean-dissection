@@ -1,6 +1,6 @@
-# Round 2 심화 감사 보고서: 사각지대 제로화 메타프로그래밍 · 수학적 경계조건 최종 판정 (Track A)
+# Lean 4.33.1 RH/GRH 트리의 메타프로그래밍과 경계 조건
 
-- **감사 역할**: `meta_auditor` (Track A — 사각지대 제로화 심화 감사관)
+- **범위**: 메타프로그래밍, 특수 선언, RH/GRH 경계 조건
 - **감사 대상**: `../lean/src/` (Lean `v4.33.1`, Mathlib `0df444a360eaa60ab8c11dca51a86af692955474`, 총 175,187개 모듈)
 - **기초 산출물 및 인덱스**:
   - `../out/lean_index.duckdb`
@@ -11,13 +11,13 @@
 
 ---
 
-## 0. 최종 판정 요약 (Executive Verdict)
+## 0. 결과
 
-### **최종 판정: `CLEAN` — 정적 사각지대 0건 (메타프로그래밍 · 특수 선언 · RH/GRH 경계조건 전수 감사 통과)**
+### **결과: `CLEAN` — 정적 사각지대 0건 (메타프로그래밍 · 특수 선언 · RH/GRH 경계조건 감사 통과)**
 
-Round 1 스캐너(`deep_audit.py`)에서 0건 초과로 탐지된 **모든** 메타프로그래밍 및 비일상 선언·옵션을 100% 원문 행단위로 전수 열람하고, `Main.lean` 5개 최종 정리의 해석적 수론 경계조건과 `SmallClassNumbers.CorGKOf` 격리 여부를 교차 검증한 결과, **Lean 4 신뢰 커널 타입체커를 우회하거나 숨겨진 공리를 주입하는 경로는 0건이며, RH/GRH 명제와 환원 증명에도 수학적 허점(vacuous loophole)이 0건**임을 확인하였다.
+Round 1 스캐너(`deep_audit.py`)에서 0건 초과로 탐지된 **모든** 메타프로그래밍 및 비일상 선언·옵션을 100% 원문 행단위로 열람하고, `Main.lean` 5개 최종 정리의 해석적 수론 경계조건과 `SmallClassNumbers.CorGKOf` 격리 여부를 교차 검증한 결과, **Lean 4 신뢰 커널 타입체커를 우회하거나 숨겨진 공리를 주입하는 경로는 0건이며, RH/GRH 명제와 환원 증명에도 수학적 허점(vacuous loophole)이 0건**임을 확인하였다.
 
-| 감사 영역 | 전체 건수 | 전수 열람률 | 커널 우회 / 공리 주입 가능성 | `Main` / `MainTheorems` 원뿔 포함 여부 | 판정 |
+| 감사 영역 | 전체 건수 | 열람률 | 커널 우회 / 공리 주입 가능성 | `Main` / `MainTheorems` 원뿔 포함 여부 | 판정 |
 | :--- | ---: | ---: | :--- | :--- | :--- |
 | `CutCptCopy.lean` (`addDecl` 2건, `partial def` 1건, `elab` 1건) | 1모듈 (91줄) | **100%** | **불가** (`.defnDecl`/`.thmDecl`만 제출 → C++ `lean_add_decl` 검증; `debug.skipKernelTC` 0건) | 모듈 원뿔 포함 (`Main` 깊이 17, `MainTheorems` 깊이 14); **동적 생성 정리(`block_growth_bound_of_compact_coefCpt`)는 `FinalS.lean:61`에서 실제 소비** | **CLEAN** |
 | `BuildAid/D1..D5.lean` (`run_cmd` / `modifyEnv` 각 5건) | 5모듈 (각 4줄) | **100%** | **불가** (`LibrarySuggestions.nameDenyListExt`에만 문자열 추가, 커널 상수 테이블 비접근) | 모듈 원뿔 포함 (깊이 5–18 from `MainTheorems`), 선언 0개, 증명항 기여 0건 | **CLEAN** |
@@ -27,16 +27,16 @@ Round 1 스캐너(`deep_audit.py`)에서 0건 초과로 탐지된 **모든** 메
 | `allowUnsafeReducibility` | 37건 | **100%** | **불가** (37/37건 전부 `attribute [local irreducible]` 부여용, 엘라보레이터 투명도 옵션) | 모듈 원뿔 포함 (`DB_Rch` 37/37) | **CLEAN** |
 | `hygiene` | 31건 | **100%** | **불가** (31/31건 전부 `set_option hygiene false in` + `local notation` 22 / `local macro` 8 / `scoped macro` 1) | 모듈 원뿔 포함 (`DB_Rch` 31/31) | **CLEAN** |
 | 기타 비일상 `set_option` (`quotPrecheck` 7, `smartUnfolding` 3, `Elab.async` 1, `genSizeOf` 1, `warn.classDefReducibility` 1) | 13건 | **100%** | **불가** (전체 33종 88,139건 중 `debug.skipKernelTC`/`debug.proofAsSorry` **0건**) | 모듈 원뿔 포함 | **CLEAN** |
-| RH/GRH 수학적 경계조건 (`Main` 등 8+개 파일) | 5개 최종 정리 | **100%** | — (`s=0`, `s=-2(n+1)`, `s=1`, `[NeZero N]`, `χ=1` vs `χ≠1`, 비원시 오일러 인자, `Re(s)=0,1` 전원 엄밀 검증) | `Main.lean` 5개 정리 전수 일치 | **CLEAN** |
+| RH/GRH 수학적 경계조건 (`Main` 등 8+개 파일) | 5개 최종 정리 | **100%** | — (`s=0`, `s=-2(n+1)`, `s=1`, `[NeZero N]`, `χ=1` vs `χ≠1`, 비원시 오일러 인자, `Re(s)=0,1` 전원 엄밀 검증) | `Main.lean` 5개 정리 일치 | **CLEAN** |
 | `MainTheoremsAll` → `SmallClassNumbers.CorGKOf` 격리 | 4개 부가 모듈 | **100%** | — (`MainTheorems` 원뿔에서 4개 모듈 0건 임포트, 완전 격리) | `Main`에만 포함, **`MainTheorems` 원뿔 외** | **CLEAN** |
 
-> **감사 범위 경계**: 본 보고서는 로컬에 `leanprover/lean4:v4.33.1` 툴체인과 `.lake/` 빌드 캐시가 부재한 환경에서 수행된 **100% 정적·원문 행단위·커널 구조 심화 감사**이다. 실제 바이너리 레벨의 형식 인증을 위해서는 추후 `v4.33.1` 환경에서 `lake build Main` 및 5개 최종 정리 대상 `#print axioms` 실행이 필요하다.
+> **감사 범위 경계**: 본 보고서는 로컬에 `leanprover/lean4:v4.33.1` 툴체인과 `.lake/` 빌드 캐시가 부재한 환경에서 수행된 **100% 정적·원문 행단위·커널 구조 감사**이다. 실제 바이너리 레벨의 형식 인증을 위해서는 추후 `v4.33.1` 환경에서 `lake build Main` 및 5개 최종 정리 대상 `#print axioms` 실행이 필요하다.
 
 ---
 
-## 제1부. 메타프로그래밍 및 특수 선언 행단위 전수 감사
+## 제1부. 메타프로그래밍 및 특수 선언 행단위 감사
 
-### 1.1 `CutCptCopy.lean` 전수 감사 (`addDecl` 2건 · `partial def` 1건 · `elab` 1건)
+### 1.1 `CutCptCopy.lean` 감사 (`addDecl` 2건 · `partial def` 1건 · `elab` 1건)
 
 - **대상 파일**:
   - 본체(전문 91줄): `../lean/src/Formalism/HermitianCurvature/HermitianCurvatureProofs/CutCptCopy.lean`
@@ -159,7 +159,7 @@ Round 1 스캐너(`deep_audit.py`)에서 0건 초과로 탐지된 **모든** 메
 
 ---
 
-### 1.2 `BuildAid/D1.lean` – `BuildAid/D5.lean` 전수 감사 (`run_cmd` / `modifyEnv` 각 5건)
+### 1.2 `BuildAid/D1.lean` – `BuildAid/D5.lean` 감사 (`run_cmd` / `modifyEnv` 각 5건)
 
 DuckDB 조회 결과 `BuildAid` 디렉터리에는 정확히 `D1.lean`–`D5.lean` 5개 파일만 존재하며, 각 파일은 정확히 4줄, 선언 수(`decl_count`) 0개이다.
 
@@ -235,7 +235,7 @@ builtin_initialize nameDenyListExt : SimplePersistentEnvExtension String (List S
 
 ---
 
-### 1.3 전체 저장소 `elab` 4건 전수 감사 (3개 파일 전문 열람)
+### 1.3 전체 저장소 `elab` 4건 감사 (3개 파일 전문 열람)
 
 Round 1 스캔(`deep_audit_results.json`) 기준 전체 175,187개 파일의 `elab` / `elab_rules` 총합은 **정확히 4건(3개 모듈)**이다. (`elab_rules` 0건, `syntax` 0건.)
 
@@ -296,7 +296,7 @@ Round 1 스캔(`deep_audit_results.json`) 기준 전체 175,187개 파일의 `el
       let (_, bad) ← (copyAt true e tgt "" 64).run #[]
       logInfo m!"kcopy_probe: {bad.size} refused: {bad.toList}"
     ```
-  - **4개 직접 임포터 전수 확인**:
+  - **4개 직접 임포터 확인**:
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/ExistsKeptChoiceUpperLattice.lean:26`: `by kcopy n.tp`, `by kcopy n.tie`, `by kcopy n.chrPsi`
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/FormsRe.lean:20`: `by kcopy T`
     - `Development/AbelianVarietyTheory/Proofs/IwasawaDecomposition/HermRe.lean:19`: `by kcopy H`
@@ -315,7 +315,7 @@ Round 1 스캔(`deep_audit_results.json`) 기준 전체 175,187개 파일의 `el
 
 ---
 
-### 1.4 전체 저장소 `partial def` 2건 전수 감사 (2개 파일 전문 열람)
+### 1.4 전체 저장소 `partial def` 2건 감사 (2개 파일 전문 열람)
 
 `deep_audit_results.json` 기준 전체 175,187개 파일의 `partial def`(및 `partial abbrev`/`instance`/`theorem` 등 모든 `partial` 선언) 총합은 **정확히 2건**이다.
 
@@ -332,11 +332,11 @@ Round 1 스캔(`deep_audit_results.json`) 기준 전체 175,187개 파일의 `el
 
 ---
 
-### 1.5 전역 `macro` 22건 · `allowUnsafeReducibility` 37건 · `hygiene` 31건 · 기타 비일상 `set_option` 전수(100%) 감사
+### 1.5 전역 `macro` 22건 · `allowUnsafeReducibility` 37건 · `hygiene` 31건 · 기타 비일상 `set_option` (100%) 감사
 
-Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json`에 수록된 **전역 `macro` 22건 전수(22/22)**, **`allowUnsafeReducibility` 37건 전수(37/37)**, **`hygiene` 31건 전수(31/31)**, 그리고 **기타 비일상 `set_option` 13건 전수(13/13)**의 원문 컨텍스트를 디스크에서 직접 100% 열람 검증하였다.
+Round 1 샘플링을 넘어, 본 감사에서는 `deep_audit_results.json`에 수록된 **전역 `macro` 22건 (22/22)**, **`allowUnsafeReducibility` 37건 (37/37)**, **`hygiene` 31건 (31/31)**, 그리고 **기타 비일상 `set_option` 13건 (13/13)**의 원문 컨텍스트를 디스크에서 직접 100% 열람 검증하였다.
 
-#### (1) 전역 `macro` 22/22건 전수 검증 표 (19개 모듈, 전원 `MainTheorems` 원뿔 포함)
+#### (1) 전역 `macro` 22/22건 검증 표 (19개 모듈, 전원 `MainTheorems` 원뿔 포함)
 
 22건 **전원이 `: tactic =>` 전술 단축어**이며, 용어(`: term`)·명령(`: command`)·표기 매크로는 **0건**이다. 어떤 매크로도 Lean/Mathlib 기본 키워드나 `Statements.lean`/`Main.lean` 식별자를 섀도잉하지 않으며, 전개 결과는 일반 전술(`simp`, `omega`, `ring`, `grind`, `linarith`, `module`, `apply`, `erw`, `exact` 등)로 귀결되어 커널 타입체킹을 정식 통과한다.
 
@@ -367,7 +367,7 @@ Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json
 
 *(참고: 나머지 국소/스코프 `macro` 65건 역시 `kc%`/`kq%`/`kd%`/`tr_via`/`obt`/`opens_le`/`tie_cases`/`pre_cases` 등 지역 전술·표현식 축약어만 포함하며, 모두 엘라보레이션 후 커널 검증을 통과한다.)*
 
-#### (2) `allowUnsafeReducibility` 37/37건 전수 검증 결과
+#### (2) `allowUnsafeReducibility` 37/37건 검증 결과
 
 37건 **전원이 타 모듈 정의에 `attribute [local irreducible]` 속성을 부여하기 위한 용도**이며, 단 1건도 `[reducible]` 강제 전환이나 전역 속성 변조가 아니다:
 - **30건** (`IsCrisP.lean:49`, `AlgClosureTensorBcrisToBdRInjective.lean:67`, `ExistsPowNorm.lean:86` 등 `InertiaEigenvalues`/`IwasawaDecomposition` 26개 모듈): `attribute [local irreducible] Per.Acris Per.Bcris` (또는 `Per.Acris` 단독). 참고로 유일하게 `in` 없이 파일 스코프로 선언된 `ExistsPowNorm.lean:86-87`도 직후 `attribute [local irreducible] Per.Acris Per.Bcris` 1줄만 존재하고 이후 일반 정리(`homog_eq`, `untilt_zero`, `gauss_l` 등)만 이어짐을 직접 확인했다.
@@ -375,7 +375,7 @@ Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json
 - **6건** (`AutomorphicInSphericalLevel.lean:218,315`, `CongLev.lean:177`, `EigGen.lean:154`, `FinOrbSubgroupOf.lean:213`, `LevUnion.lean:78`): `attribute [local irreducible] cv Kv Ov DX KD RP SA Lsq ...`.
 - **커널 무관성**: `irreducible` 속성은 엘라보레이터의 `Meta` 투명도(transparency) 힌트일 뿐 C++ 커널은 `irreducible` 속성을 무시하고 모든 `def`의 정의적 동치를 동일하게 검사하므로, 건전성(soundness)에 영향을 줄 수 없다.
 
-#### (3) `hygiene` 31/31건 전수 검증 결과
+#### (3) `hygiene` 31/31건 검증 결과
 
 31건 **전원이 `set_option hygiene false in` (단일 선언 스코프 한정)**이며, 직후 대상은 정확히 다음 3종뿐이다:
 - `local notation` **22건** (예: `ExistsOrderTwoTranslateEvenCubicalBundle.lean:376-377` `local notation "𝔪" => ...`, `PNormalModelPlace.lean:174-189` `𝒜, ℬ, 𝒪, 𝒪̄, 𝒯, 𝒦, ℱ, 𝔏`, `PJoinDivCycle.lean:53-59` `ψ, ε`, `LocUnrSplit.lean:120-121` `𝟙` 등 — 섹션 변수를 표기 내부에서 직접 참조하기 위함).
@@ -383,7 +383,7 @@ Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json
 - `scoped macro` **1건** (`RingSpecNormalisedCharacterEq.lean:73-75` — `scoped macro "copy_cases " h:ident D:ident D':ident : tactic`).
 - **커널 무관성**: 매크로 위생(hygiene)은 파싱·매크로 전개 단계의 식별자 이름 포착 규칙에만 관여하며, 전개된 최종 증명항은 일반 코드와 동일하게 커널 타입체커를 통과한다.
 
-#### (4) 기타 비일상 `set_option` 13/13건 및 전체 33종(88,139건) 전수 점검
+#### (4) 기타 비일상 `set_option` 13/13건 및 전체 33종(88,139건) 점검
 
 - `quotPrecheck false` **7/7건**: 전부 `local notation` 사전 구문검사 억제(`ExistsUniqueVectorFieldOfGlobalOneFormValues.lean:36`, `TwistedOrbitalSwapConvolution.lean:26,28`, `TuplesP.lean:1433`, `MeasFr.lean:90`, `MeasLev.lean:23`, `SatisfiesGlRelationsBilinearLeft.lean:43` — `section ops` 내부 `local notation "D"`, `"Mx"`).
 - `smartUnfolding false in` **3/3건**: `ECure.lean:18`, `BuDefQEta.lean:123,136` — 엘라보레이터 WHNF 전개 휴리스틱 비활성화(커널 무관).
@@ -394,7 +394,7 @@ Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json
 
 ---
 
-## 제2부. 해석적 수론 경계조건 심화 감사 (Mathematical Edge-Case Audit)
+## 제2부. 해석적 수론 경계조건 감사 (Mathematical Edge-Case Audit)
 
 ### 2.1 `Main.lean` 5개 최종 정리와 `Statements.lean` · Mathlib 정의적 일치성 검증
 
@@ -410,7 +410,7 @@ Round 1 샘플링을 넘어, 본 심화 감사에서는 `deep_audit_results.json
 
 ---
 
-### 2.2 리만 제타 함수 $\zeta(s)$ 경계조건 전수 감사
+### 2.2 리만 제타 함수 $\zeta(s)$ 경계조건 감사
 
 `Statements.lean:3-4` 원문:
 ```lean
@@ -450,7 +450,7 @@ def RiemannZetaZerosOnLine : Prop :=
 
 ---
 
-### 2.3 디리클레 $L$-함수 $L(s, \chi)$ 경계조건 전수 감사 (GRH)
+### 2.3 디리클레 $L$-함수 $L(s, \chi)$ 경계조건 감사 (GRH)
 
 `Statements.lean:6-16` 원문:
 ```lean
@@ -546,7 +546,7 @@ def PrimitiveDirichletLZerosOnLine : Prop :=
 
 **격리성 수학적·데이터베이스 완전 검증**:
 - 4개 `SmallClassNumbers` 모듈(`CorGKOf`, `ClassNumberThree`, `LenEqZeroIff`, `OnePoint`)의 모듈명은 **전부 순수 ASCII 문자열**이다. Round 1에서 규명된 `index_lean.py:21`의 유니코드 `₂` 절단 버그는 오직 `dst_module`에 `₂`가 포함된 간선만 유실시키므로, 전체 175,187개 파일(유니코드 `₂` 모듈 394개 포함)에서 위 4개 모듈을 향하는 모든 `import` 간선은 DuckDB `imports` 테이블에 100% 누락 없이 수록되어 있다.
-- DuckDB `imports` 전수 조회 결과:
+- DuckDB `imports` 조회 결과:
   - `SmallClassNumbers.CorGKOf`의 유일한 임포터: `['Supplements.Kernels.MainTheoremsAll']`
   - `SmallClassNumbers.LenEqZeroIff`의 유일한 임포터: `['Supplements.Kernels.MainTheoremsCritical']`
   - `SmallClassNumbers.OnePoint`의 유일한 임포터: `['Supplements.Kernels.MainTheoremsCritical']`
@@ -558,6 +558,6 @@ def PrimitiveDirichletLZerosOnLine : Prop :=
 
 ## 제3부. 최종 종합 요약 및 사후 동적 검증 절차
 
-1. **메타프로그래밍 사각지대 0건**: `CutCptCopy.lean`(`addDecl` 2건), `BuildAid/D1..D5`(`run_cmd`/`modifyEnv` 5건), 전체 `elab` 4건(`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), 전체 `partial def` 2건(`go`, `copyAt`), 전역 `macro` 22/22건, `allowUnsafeReducibility` 37/37건, `hygiene` 31/31건, 기타 비일상 `set_option` 13/13건 전수를 원문 행단위로 검증 완료하였으며, 단 1건의 커널 우회·공리 주입·심볼 섀도잉도 존재하지 않는다.
+1. **메타프로그래밍 사각지대 0건**: `CutCptCopy.lean`(`addDecl` 2건), `BuildAid/D1..D5`(`run_cmd`/`modifyEnv` 5건), 전체 `elab` 4건(`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), 전체 `partial def` 2건(`go`, `copyAt`), 전역 `macro` 22/22건, `allowUnsafeReducibility` 37/37건, `hygiene` 31/31건, 기타 비일상 `set_option` 13/13건을 원문에서 행마다 검증 완료하였으며, 단 1건의 커널 우회·공리 주입·심볼 섀도잉도 존재하지 않는다.
 2. **수학적 경계조건 사각지대 0건**: `Main.lean`의 5개 정리(`riemannHypothesis`, `riemannZeta_eq_zero_re`, `LFunction_ne_zero_of_half_lt_re`, `LFunction_eq_zero_re`, `LFunction_eq_zero_re_of_isPrimitive`)는 자명한 영점($-2,-4,\dots$), $s=0$ 비영 증명(`riemannZeta_zero`), 극점 $s=1$, `[NeZero N]`, 주지표/비주지표 분기(`χ ≠ 1 ∨ s ≠ 1`), 비원시 지표 오일러 인자 비소멸($\operatorname{Re}(s) > 0$), 경계선 $\operatorname{Re}(s) = 0, 1$ 거동, 그리고 Mathlib `0df444a3` `DirichletCharacter.LFunction`의 임계대 일치성까지 고전적 RH/GRH 정의와 100% 부합한다. `SmallClassNumbers.CorGKOf`는 `MainTheorems` 원뿔 외부에 완전 격리되어 있다.
 3. **최종 동적 커널 인증(후속 권장)**: 로컬에 공식 `leanprover/lean4:v4.33.1` 툴체인 및 Mathlib `0df444a360eaa60ab8c11dca51a86af692955474` 캐시 확보 후 `lake build Main` 및 5개 정리 `#print axioms` 실행을 통해 허용 표준 공리(`propext`, `Classical.choice`, `Quot.sound`) 외 0건임을 최종 동적 확정한다.
