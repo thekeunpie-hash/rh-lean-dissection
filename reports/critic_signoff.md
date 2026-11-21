@@ -1,11 +1,11 @@
-# Round 2 Final Adversarial Review Gate & SIGN-OFF Report (Track D: `adversarial_critic`)
+# Review of the Round 2 RH/GRH notes
 
 > **Language**: English ([한국어 원문](ko/critic_signoff.md))
 
 - **Audit Scope**: All Round 2 deliverables across all tracks for the Lean 4.33.1 RH/GRH repository (`../lean/src/`, 175,187 modules)
-  - **Track A (`@meta_auditor`)**: [meta_audit_verdict.md](meta_audit_verdict.md) (563L)
-  - **Track B (`@math_translator`)**: [rosetta_stone.md](rosetta_stone.md) (287L), [rh_proof_explained.md](rh_proof_explained.md) (386L)
-  - **Track C (`@refactor_eng`)**: [capelli_batch_report.md](capelli_batch_report.md) (115L), [unitary_dedup_plan.md](unitary_dedup_plan.md) (104L), [tactic_golf_report.md](tactic_golf_report.md) (103L), [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (1,639L), `capelli_shadow/` (82 files), [UnifiedSWeqOm.lean](../poc/UnifiedSWeqOm.lean) (251L), [golfed_RingObjectsOfMatrixData.lean](../poc/golfed_RingObjectsOfMatrixData.lean) (598L), and 7 standalone Lean `v4.34.1` harnesses
+  - **Track A (`audit`)**: [meta_audit_verdict.md](meta_audit_verdict.md) (565L)
+  - **Track B (`proof notes`)**: [rosetta_stone.md](rosetta_stone.md) (287L), [rh_proof_explained.md](rh_proof_explained.md) (376L)
+  - **Track C (`compression`)**: [capelli_batch_report.md](capelli_batch_report.md) (116L), [unitary_dedup_plan.md](unitary_dedup_plan.md) (106L), [tactic_golf_report.md](tactic_golf_report.md) (105L), [de_explicit_capelli.py](../scripts/de_explicit_capelli.py) (1,639L), `capelli_shadow/` (82 files), [UnifiedSWeqOm.lean](../poc/UnifiedSWeqOm.lean) (251L), [golfed_RingObjectsOfMatrixData.lean](../poc/golfed_RingObjectsOfMatrixData.lean) (598L), and 7 standalone Lean `v4.34.1` harnesses
 - **Verification Tooling & Raw Evidence**:
   - [verify_round2.py](../scripts/verify_round2.py) (514L — Unicode-aware DuckDB + on-disk reference verification, 82-file shadow audit, independent Lean `v4.34.1` harness compilation, and `RingObjectsOfMatrixData` signature & integrity checks)
   - [critic_sig_dump.txt](../out/critic_sig_dump.txt) (1,142L — raw signature dump of the 18 core Track B theorems)
@@ -14,22 +14,21 @@
 
 ---
 
-## 0. Final Verdict Summary (EXPLICIT SIGN-OFF)
+## 0. Checks
 
-| Track | Assigned Agent | Review Cycles | Defects Found → Resolved | Automated Reference Accuracy (Real Repo Refs) | Standalone Compilation / Structural Integrity | Final Verdict |
+| Track | Notes | Review Cycles | Defects Found → Resolved | Automated Reference Accuracy (Real Repo Refs) | Standalone Compilation / Structural Integrity | Final Verdict |
 | :--- | :--- | :---: | :---: | :---: | :--- | :---: |
-| **Track A** | `@meta_auditor` | Passed on 1st pass | 0 defects | **257 / 257 (100.0%)** *(excluding 22 non-repo stdlib/range tokens)* | Exhaustive cross-check passed for `CutCptCopy`, `BuildAid/D1..D5`, 4 `elab`s, 2 `partial def`s, and RH/GRH boundary conditions | **SIGN-OFF** |
-| **Track B** | `@math_translator` | **v1 → v2 (1 cycle completed)** (`#26`→`#27`→`#28`) | **10 caught → 10/10 fixed** | **`rosetta_stone.md` 433 / 433 (100.0%)** / **`rh_proof_explained.md` 336 / 336 (100.0%)** | 18/18 core theorems passed direct raw-signature cross-check, 9 core concepts passed Anti-Fallacy audit, valid Mermaid diagram | **SIGN-OFF** |
-| **Track C** | `@refactor_eng` | **v1 → v2 (1 cycle completed)** (`#32`→`#33`) | **4 caught → 4/4 fixed** *(including 3 critical bugs)* | **115 / 115 (100.0%)** *(excluding 14 Mathlib/proposed-module/changelog tokens)* | 82-file shadow integrity (`0` leaks, `116` phantom binders preserved), 100% `RingObjects` signature match & `mkRingInst` fix verified, **7/7 harnesses `exit 0`** | **SIGN-OFF** |
+| **Track A** | `audit` | Passed on 1st pass | 0 defects | **257 / 257 (100.0%)** *(excluding 22 non-repo stdlib/range tokens)* | cross-check passed for `CutCptCopy`, `BuildAid/D1..D5`, 4 `elab`s, 2 `partial def`s, and RH/GRH boundary conditions | **pass** |
+| **Track B** | `proof notes` | **v1 → v2 (1 cycle completed)** (`#26`→`#27`→`#28`) | **10 caught → 10/10 fixed** | **`rosetta_stone.md` 433 / 433 (100.0%)** / **`rh_proof_explained.md` 336 / 336 (100.0%)** | 18/18 core theorems passed direct raw-signature cross-check, 9 core concepts passed the name-search check, valid Mermaid diagram | **pass** |
+| **Track C** | `compression` | **v1 → v2 (1 cycle completed)** (`#32`→`#33`) | **4 caught → 4/4 fixed** *(including 3 critical bugs)* | **115 / 115 (100.0%)** *(excluding 14 Mathlib/proposed-module/changelog tokens)* | 82-file shadow integrity (`0` leaks, `116` phantom binders preserved), 100% `RingObjects` signature match & `mkRingInst` fix verified, **7/7 harnesses `exit 0`** | **pass** |
 
-> [!IMPORTANT]
-> **Source Immutability Verification (`downloads/lean/src/` Confirmed Untouched)**: An exhaustive mtime check across 84 core original files — the 82 source files backing `capelli_shadow/` plus `Main.lean` and `RingObjectsOfMatrixData.lean` — found **0** files modified after the Round 2 start timestamp (`2026-11-21T06:30:00Z`; latest mtime `2026-11-21T05:06:36Z`). All artifacts were written strictly inside `downloads/lean-analysis/teamwork_out/round2/`.
+**Source Immutability Verification (`downloads/lean/src/` Confirmed Untouched)**: A mtime check across 84 core original files — the 82 source files backing `capelli_shadow/` plus `Main.lean` and `RingObjectsOfMatrixData.lean` — found **0** files modified after the Round 2 start timestamp (`2026-11-21T06:30:00Z`; latest mtime `2026-11-21T05:06:36Z`). All artifacts were written strictly inside `downloads/lean-analysis/teamwork_out/round2/`.
 
 ---
 
 ## 1. Consolidated Automated Verification Metrics (Independent `verify_round2.py` Run)
 
-### 1.1 Exhaustive Markdown `Module.decl` & File Reference Verification Table
+### 1.1 Markdown `Module.decl` & File Reference Verification Table
 
 | Target Deliverable | Total Checked Tokens | Script PASS | WARN | Script FAIL (Non-Repo / Parser-Artifact Breakdown) | **Real Repo Reference Accuracy** |
 | :--- | ---: | ---: | ---: | :--- | :---: |
@@ -57,7 +56,7 @@
 
 ---
 
-## 2. Track A (`@meta_auditor`) Independent Cross-Audit Summary
+## 2. Track A (`audit`) Independent Cross-Audit Summary
 
 Direct cross-verification of every core claim in [meta_audit_verdict.md](meta_audit_verdict.md) against raw sources in `downloads/lean/src/`, `lean_index.duckdb`, and the local Lean 4 stdlib source (`../lean-toolchain/src/lean/Lean/{AddDecl,Environment,LibrarySuggestions/Basic}.lean`) passed on the first review with **0 defects**:
 
@@ -65,19 +64,19 @@ Direct cross-verification of every core claim in [meta_audit_verdict.md](meta_au
    - Direct inspection of all 91 source lines confirms every `addDecl (.defnDecl ...)` and `addDecl (.thmDecl ...)` call routes through `Lean.addDecl` → `Environment.addDeclCore` → the C++ kernel `lean_add_decl`. Repository-wide counts: `debug.skipKernelTC = 0`, `addDeclWithoutChecking = 0`.
    - `partial def go` is purely a compile-time meta `Expr` rewriter and never appears in the resulting term (`value`) submitted to the kernel.
    - Raw source confirms that `block_growth_bound_of_compact_coefCpt`, generated by `cpt_copy_thms` at `CutMainCpt.lean:475, 944-945`, is actually consumed at `FinalS.lean:60-61`.
-2. **Exhaustive Check of `BuildAid/D1..D5.lean` (Benign Search Deny-Lists)**:
+2. **Check of `BuildAid/D1..D5.lean` (Benign Search Deny-Lists)**:
    - All 5 files share an identical 4-line structure (`initialize Lean.LibrarySuggestions.nameDenyListExt.addEntry ...`) that affects only `grind`/library-suggestion filtering, with zero impact on logical axioms or kernel state.
    - Importer counts (3 / 4 / 25 / 5 / 1), shortest depths from `Main` (13 / 12 / 8 / 8 / 19), and shortest depths from `MainTheorems` (12 / 11 / 5 / 6 / 18) match DuckDB queries 100%.
 3. **Full Meta & Option Inventory Cross-Check**:
    - All 4 `elab` declarations (`cpt_copy_thms`, `kexactB`, `kcopy`, `#kcopy_probe`), 2 `partial def`s (`go`, `copyAt`), 22 global `macro`s (spot-checked at `NegOnePowBoundaryTermsCancel:114`, `RttUpperRelationsFromDescent:30`, `Theta1:25`), 37 `allowUnsafeReducibility`, 31 `hygiene`, and 13 other special `set_option` entries match raw source with 0 kernel-soundness violations.
-4. **Exhaustive RH / GRH Statement Boundary-Condition Audit (`Statements.lean`, `Main.lean`, `CritLine.lean`, `RhOfRight.lean`, `ClaimStrip.lean`, `EveryCharacter.lean`, `Imprimitive.lean`, `HalfPlane.lean`, `poleData.lean:196`, `CharFamilyLFunctionNeZeroOfOneLeRe.lean:17-20`, `PrimePairSizeCondition.lean:19`, `RiemannHypothesisOfEveryCharacter.lean:219`)**:
+4. **RH / GRH Statement Boundary-Condition Audit (`Statements.lean`, `Main.lean`, `CritLine.lean`, `RhOfRight.lean`, `ClaimStrip.lean`, `EveryCharacter.lean`, `Imprimitive.lean`, `HalfPlane.lean`, `poleData.lean:196`, `CharFamilyLFunctionNeZeroOfOneLeRe.lean:17-20`, `PrimePairSizeCondition.lean:19`, `RiemannHypothesisOfEveryCharacter.lean:219`)**:
    - Exclusion of trivial zeros $s = -2(n+1)$, nonvanishing at $s = 0$ (proved across all 3 routes via `riemannZeta_zero`), handling of the pole at $s = 1$, the subtle distinction between `Imprimitive.lean:10-20` and `ZeroFreeAll` (Euler-factor nonvanishing for imprimitive principal characters $N>1$ on $\operatorname{Re}(s)>0$, `[NeZero N]`), treatment of the boundary lines $\operatorname{Re}(s)=0, 1$, and pointwise equivalence on the critical strip are all documented completely and accurately.
 5. **Cone Isolation Verification for the 8 `SmallClassNumbers` Modules**:
    - The DuckDB ASCII cone difference (`Main` − `MainTheorems`) is exactly 8 modules (`Main`, `Statements`, `MainTheoremsAll`, `MainTheoremsCritical` + `SmallClassNumbers.{CorGKOf, ClassNumberThree, LenEqZeroIff, OnePoint}`); the full Unicode-aware cone matches identically at `175,187 - 175,179 = 8`.
 
 ---
 
-## 3. Track B (`@math_translator`) Raw-Signature Cross-Check of 18 Core Theorems & v1→v2 Audit
+## 3. Track B (`proof notes`) Raw-Signature Cross-Check of 18 Core Theorems & v1→v2 Audit
 
 ### 3.1 Direct Raw Lean Signature Cross-Verification Table for 18 Core Theorems (`>=10` Requirement Substantially Exceeded)
 
@@ -104,7 +103,7 @@ Raw type signatures for all 18 declarations were read directly from `downloads/l
 | 17 | `GlobalTheory.Unf.Chain` & `Row0b`/`PropsB` (`IsThetaFam.lean:149-205`, `RowSrc.lean:6`, `WeightsConjBis.lean:55-73`) | Inductive chain `Chain.{last, step}` + 6 fields of `Row0b`/`PropsB` (including `weights`) | **Defect #10**: Omitted `weights` from the `PropsB` field list | **FIXED & PASS** (6/6 fields complete) |
 | 18 | `weighted_von_mangoldt_sum_identity` & `meanSqK` & `recTExists` (`WeightedVonMangoldtSumIdentity.lean:227`, `meanSqK.lean:51`, `RecTExists.lean:20`) | `0 < a`, `0 < w`, `⌊a/w⌋₊ ≤ M`; `meanSqK` prime-factor dichotomy `≤ Y^(ε/5) ∨ (Y^K)^400 < p`; `recTExists` complete with all 12 fields | **Defect #8** *(related)*: Miscounted `O2` modules (`10` → exact DuckDB count `4` case-sensitive / `5` case-insensitive with `Two2`) + expanded `GL5LogLValueBoundByZeta` declaration audit | **FIXED & PASS** (exact counts + declaration audit added) |
 
-### 3.2 Anti-Fallacy Audit Verdict for the 9 Rosetta Stone Concepts
+### 3.2 Name check for the nine claims
 
 - **Complete Elimination of the "Keyword Absent = Concept Absent" Fallacy**:
   - The mappings for **⑦ Bost (slope inequality)** (`Formalism.HN.{muDef, TheoremF, TheoremFSharp}` + `MeanBoundSecondForm`) and **⑨ Weak Vandiver / Lichtenbaum $H^1$/$H^2$** (`Formalism.GaloisCohomology.{Sha, shaLen, VLen, PTCoker, PTSha}` + `UpperTheory.Top.{VVle, VWin}`) — which directly overturned Round 1's 0-hit keyword false negatives through raw Lean `def`/`theorem` signature inspection — are 100% consistent with raw source.
@@ -113,7 +112,7 @@ Raw type signatures for all 18 declarations were read directly from `downloads/l
 
 ---
 
-## 4. Track C (`@refactor_eng`) 6-Sample Shadow Deep-Diff Audit, `RingObjects` Integrity, & v1→v2 Revision Loop
+## 4. Track C (`compression`) 6-Sample Shadow Deep-Diff Audit, `RingObjects` Integrity, & v1→v2 Revision Loop
 
 ### 4.1 `capelli_shadow/` 6-Sample Deep-Diff & Bug-Fix Target File Audit Table (Exceeding 5-Sample Requirement)
 
@@ -161,16 +160,16 @@ Raw type signatures for all 18 declarations were read directly from `downloads/l
 
 | Track | Feedback Board Seq | Fix Report Seq | Summary of Resolved Items | Re-Verification Status |
 | :--- | :---: | :---: | :--- | :---: |
-| **Track A** (`@meta_auditor`) | — | `#24` | 0 defects across exhaustive raw-source, stdlib, and DuckDB cross-check on 1st audit | **1st-Pass PASS → SIGN-OFF** |
-| **Track B** (`@math_translator`) | `#26` | `#27` | 10/10 defects resolved: `level_of_tiedWin` `eD,eL∈ℝ`; `WindowTwo`/`OrbitOne` attribution; `SizesTextAt` upper/lower bound separation; `TheoremF` block coupling & `MeanBoundSecondForm` `Nonempty U0`; `LinkDIV_at`/`LinkG_at`/`LinkS` missing conjuncts & `1≤C0` separation; `BesselMapUniq`/`PoincareSetting.Pu`/`WuDecayOfGap` preconditions & location split; `VVle` `shaLen≠⊤` & `SmallClassNumbers` preconditions; `O2` count (`4`/`5`) & `GL5LogLValueBoundByZeta`; `rallis_inner_product_big_theta_lift` existential quantifier; `weights` field added to `PropsB` | **Re-Verification 100% PASS (`#28`) → SIGN-OFF** |
-| **Track C** (`@refactor_eng`) | `#32` | `#33` | 4/4 items resolved: (1) Fixed `ContinuousLinearMap` 13-arg off-by-one (`args[9]→args[8]`) + added `check_notation_instance_leaks()` guard (`0/82` leaks); (2) Transitive inferability fixed-point preservation of phantom implicit binders (`phantom_named_preserved=116`, `KwF` 36/36, `hcompl`/`loc` 3/3, `IsSplit` 1/1); (3) Fixed `golfed_RingObjectsOfMatrixData.lean:357` `mkRingInst` defeq bug with `rw [hρk, hρk, hsm, mul_smul]` (`v4.34.1 exit 0`); (4) Fixed `Subalgebra.adjoin → Algebra.adjoin` and synchronized all metrics across `UnifiedSWeqOm.lean` (`251L`/`187L`) and `tactic_golf_report.md` | **Re-Verification 100% PASS (7/7 harnesses `exit 0`) → SIGN-OFF** |
+| **Track A** (`audit`) | — | `#24` | 0 defects across raw-source, stdlib, and DuckDB cross-check on 1st audit | **1st-Pass PASS → pass** |
+| **Track B** (`proof notes`) | `#26` | `#27` | 10/10 defects resolved: `level_of_tiedWin` `eD,eL∈ℝ`; `WindowTwo`/`OrbitOne` attribution; `SizesTextAt` upper/lower bound separation; `TheoremF` block coupling & `MeanBoundSecondForm` `Nonempty U0`; `LinkDIV_at`/`LinkG_at`/`LinkS` missing conjuncts & `1≤C0` separation; `BesselMapUniq`/`PoincareSetting.Pu`/`WuDecayOfGap` preconditions & location split; `VVle` `shaLen≠⊤` & `SmallClassNumbers` preconditions; `O2` count (`4`/`5`) & `GL5LogLValueBoundByZeta`; `rallis_inner_product_big_theta_lift` existential quantifier; `weights` field added to `PropsB` | **Re-Verification 100% PASS (`#28`) → pass** |
+| **Track C** (`compression`) | `#32` | `#33` | 4/4 items resolved: (1) Fixed `ContinuousLinearMap` 13-arg off-by-one (`args[9]→args[8]`) + added `check_notation_instance_leaks()` guard (`0/82` leaks); (2) Transitive inferability fixed-point preservation of phantom implicit binders (`phantom_named_preserved=116`, `KwF` 36/36, `hcompl`/`loc` 3/3, `IsSplit` 1/1); (3) Fixed `golfed_RingObjectsOfMatrixData.lean:357` `mkRingInst` defeq bug with `rw [hρk, hρk, hsm, mul_smul]` (`v4.34.1 exit 0`); (4) Fixed `Subalgebra.adjoin → Algebra.adjoin` and synchronized all metrics across `UnifiedSWeqOm.lean` (`251L`/`187L`) and `tactic_golf_report.md` | **Re-Verification 100% PASS (7/7 harnesses `exit 0`) → pass** |
 
 ---
 
-## 6. Final Approval Declaration (FINAL SIGN-OFF)
+## 6. What was checked
 
-This adversarial review gate (`adversarial_critic`) has completed automated verification, direct raw-signature cross-checking, shadow deep-diffs, independent Lean `v4.34.1` recompilation, and full fix–reverification loops for Tracks B and C across all Round 2 deliverables, and hereby issues official **SIGN-OFF** for all three tracks:
+`verify_round2.py`, the signature dump, the shadow diffs, and a fresh Lean v4.34.1 compile were run on these notes. The proof notes and the compression notes were fixed once and checked again.
 
-- **Track A (`@meta_auditor`)**: **APPROVED / SIGN-OFF**
-- **Track B (`@math_translator`)**: **APPROVED / SIGN-OFF**
-- **Track C (`@refactor_eng`)**: **APPROVED / SIGN-OFF**
+- audit (`meta_audit_verdict.md`): pass
+- proof notes (`rosetta_stone.md`, `rh_proof_explained.md`): pass
+- compression (`capelli_batch_report.md`, `unitary_dedup_plan.md`, `tactic_golf_report.md`): pass
