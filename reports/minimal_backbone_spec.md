@@ -2,7 +2,7 @@
 
 > **Target Formalization**: `leanprover-community/riemann-hypothesis` (Lean `v4.33.1`, Mathlib `0df444a360eaa60ab8c11dca51a86af692955474`, 0 `sorry`, 0 user `axiom`)  
 > **Kernel Export Ground Truth**: Andrew Sutherland & James Shore `v0.2.1` Lean kernel export (`cone-constants.txt.gz`, `decls.csv.gz`, `dominators.tsv.gz`, `why-parents.csv.gz`, `directories.csv.gz`; standard axioms `{propext, Classical.choice, Quot.sound}` only)  
-> **Machine-Readable Summary**: [kernel_backbone_summary.json](kernel_backbone_summary.json) · **Citation Auditor**: [audit_spec_citations.py](../scripts/audit_spec_citations.py)  
+> **Machine-Readable Summary**: [kernel_backbone_summary.json](kernel_backbone_summary.json) · **Citation Auditor**: [audit_spec_citations.py](../scripts/audit_spec_citations.py) · **NDJSON Statement Auditor**: [audit_ndjson_statement.py](../scripts/audit_ndjson_statement.py)  
 > **Companion Reports**: [rosetta_stone.md](rosetta_stone.md) · [rh_proof_explained.md](rh_proof_explained.md) · [meta_audit_verdict.md](meta_audit_verdict.md)
 
 ## Epistemic Labeling Convention
@@ -62,6 +62,7 @@ Even inside the `10.74M`-line active kernel cone, three major machine-generation
    - `StabilizerVolume`: `145 / 155` files active (`15,186 / 15,895` decl lines = **95.5%** active — primary copy).
    - `StabilizerOrbitVolume`: `53 / 147` files active (`5,407 / 15,600` decl lines = **34.7%** active).
    - `WeilStabilizerVolume`: `4 / 146` files active (`135 / 14,668` decl lines = **0.9%** active — **99.1% dead**).
+4. **Legacy `backward.*` transparency overrides inside the active cone**: Four 100%-kernel-used (`89 / 89` declarations `in_cone = true`) algebraic-geometry files accounted for **26 of 33** repository-wide `backward.defeqAttrib.useBackward` hits (`78.8%`) and **40** `backward.isDefEq.respectTransparency` hits (`66` directives total). Removing all 66 directives cleanly under Lean `v4.33.1` (`-DwarningAsError=true` with `0` warnings, exact `.olean` `Kernel.isDefEq` / `Meta.isDefEq` equivalence, `{propext, Classical.choice, Quot.sound}` only, and `5/5` direct `dist=1` importers verified) is open as [PR #71](https://github.com/leanprover-community/riemann-hypothesis/pull/71) (`ea66ac29e`): `CofilteredSchemeLimitExistsLocally.lean` (`40 → 0`), `CoequifiberedDiagramMap.lean` (`10 → 0`), `RelObjIsoHomSubtype.lean` (`13 → 0`), and `ExistsEtaleNeighbourhoodFinitePieceIsolatedPoint.lean` (`3 → 0`).
 
 ---
 
@@ -262,9 +263,9 @@ Before the `v0.2.1` kernel export was joined against our static DuckDB index, ou
 
 ## 8. Independent External-Kernel Verification & TCB / Metaprogramming Audit `[Exact]` + `[Verified]`
 
-### 8.1 Multi-Kernel & Arithmetic-Consequence Verification (MIT, 2026-11-22 03:10 UTC) `[Exact]`
+### 8.1 Multi-Kernel & Arithmetic-Consequence Verification (MIT, 2026-11-22 04:35 UTC) `[Exact]`
 
-All entries below are taken verbatim from Andrew Sutherland's [MIT verification page](https://math.mit.edu/~drew/grh/) on Lean `v4.33.1` / Mathlib `v4.33.1` (`solution.ndjson` = `61,570,595,788` B, `sha256 5ea74b91…244e`; `challenge.ndjson` = `350,862,970` B, `sha256 bd484ac9…b2b9`):
+All entries below are taken verbatim from Andrew Sutherland's [MIT verification page](https://math.mit.edu/~drew/grh/) on Lean `v4.33.1` / Mathlib `v4.33.1` (`solution.ndjson` = `61,570,595,788` B, `sha256 5ea74b91…244e`; `challenge.ndjson.zst` = `46.88 MB`, unpacked `350,862,311` B, `sha256 bd484ac9…b2b9`):
 
 | Checker / Audit | Verdict | Scope & Measured Detail |
 | :--- | :--- | :--- |
@@ -276,6 +277,8 @@ All entries below are taken verbatim from Andrew Sutherland's [MIT verification 
 | `con-leche` (`master`, `cd2eceab`, `--verified` + `--compare`) | **PASS** | `1,468,418` solution decls + `51,692` challenge decls accepted (3m 15s on 64 threads); all 5 `Main.lean` theorems justified against `Challenge.lean` |
 | `con-ron --compare` (Rust port, `master`, `3f22699b`) | **PASS** | `1,468,418` solution + `51,692` challenge decls accepted in `--verified` mode (`exit 0`, 7m 06s on 64 threads) |
 | **Zeta-free arithmetic check** (`kimihiro64/Robin1984`, `acab1a3`) | **PASS** | Combining the proof with an independent formalization of Robin's & Lagarias's criteria proves `robin_inequality` ($\forall n > 5040,\ \sigma(n) < e^\gamma n \log\log n$) and `lagarias_inequality` ($\forall n > 0,\ \sigma(n) \le H_n + e^{H_n}\log H_n$) using `{propext, Classical.choice, Quot.sound}` only; combined `61.75 GB` export (`1,472,825` decls, `sha256 44651dcc…26f0d`) accepted by `con-leche --compare`, `con-ron --compare`, and `nanoda` (33m 46s on 64 threads) |
+| **Elaborated arithmetic statements** ([`explicit-statements.out`](https://math.mit.edu/~drew/grh/explicit-statements.out)) | **PASS** | Elaborated against Mathlib `0df444a3` alone (none of the proof loaded) with every coercion, instance, and implicit printed: `lagariasStmt` names **27** constants directly with a transitive definition closure of **1,801** declarations (`836` defs, `559` theorem statements, `179` inductives, `227` other); `robinStmt` names **21** constants directly with a closure of **2,050** declarations (`955` defs, `630` theorem statements, `207` inductives, `258` other; difference mainly `Real.eulerMascheroniConstant`) |
+| **Lean-free raw NDJSON audit** ([`audit_ndjson_statement.py`](../scripts/audit_ndjson_statement.py)) | **PASS** | Independent stdlib-only Python parse of MIT's `challenge.ndjson.zst` (`51,692` top-level records incl. `46` `opaque`, `6,495,712` lines, `sha256 bd484ac9…b2b9`, `0` unsafe, `0` missing): extracts all 5 raw kernel statement ASTs and confirms `{Classical.choice, Quot.sound, propext}` only (`0` `sorryAx`) across the full statement-type closures — `riemannHypothesis` & `riemannZeta_eq_zero_re` (`32` direct / `4,889` def-closure / `52,527` full), `LFunction_ne_zero_of_half_lt_re` (`34` / `5,126` / `52,889`), `LFunction_eq_zero_re` (`29` / `5,119` / `52,869`), `LFunction_eq_zero_re_of_isPrimitive` (`30` / `5,236` / `52,992`) |
 
 ### 8.2 Trusted Computing Base (TCB) & Metaprogramming Audit `[Exact]` + `[Verified]`
 
@@ -301,4 +304,12 @@ python scripts/audit_spec_citations.py \
   reports/minimal_backbone_spec.md \
   reports/rosetta_stone.md \
   reports/rh_proof_explained.md
+```
+
+To independently inspect the five raw kernel headline statements and verify their SHA-256, safety flags, and axiom closures directly from MIT's `challenge.ndjson.zst` (no Lean toolchain or third-party Python packages required):
+
+```sh
+python scripts/audit_ndjson_statement.py \
+  --expected-sha256 bd484ac9886a96f26b1d9a7a59ebd45b7a70d102c015d4f31f9302bbdd6ab2b9 \
+  path/to/challenge.ndjson.zst
 ```
