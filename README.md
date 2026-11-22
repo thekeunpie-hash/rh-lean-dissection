@@ -4,7 +4,7 @@ Static analysis, standalone Lean harnesses, and refactoring experiments for Leve
 
 - [Original release announcement](https://alpo.ge/remark.pdf) and [source mirror](https://github.com/leanprover-community/riemann-hypothesis).
 - **[Standalone Kernel-Grounded Minimal Backbone Spec](https://github.com/thekeunpie-hash/rh-kernel-backbone)** ([interactive web edition](https://thekeunpie-hash.github.io/rh-kernel-backbone/)).
-- Upstream simplification PRs verified on Lean `v4.33.1`: [PR #60](https://github.com/leanprover-community/riemann-hypothesis/pull/60) (`FixPiIff.lean`, `8,029 → 45` L) and [PR #65](https://github.com/leanprover-community/riemann-hypothesis/pull/65) (4 kernel-used `CapelliIdentities` files, `5,073 → 591` L, `105 → 0` warnings).
+- Upstream simplification PRs verified on Lean `v4.33.1` (both **merged**): [PR #60](https://github.com/leanprover-community/riemann-hypothesis/pull/60) (`173225e84`, `FixPiIff.lean`, `8,029 → 45` L) and [PR #65](https://github.com/leanprover-community/riemann-hypothesis/pull/65) (`f1f6d6542`, 4 kernel-used `CapelliIdentities` files, `5,073 → 591` L, `105 → 0` warnings).
 - [Andrew Sutherland's independent verification at MIT](https://math.mit.edu/~drew/grh/).
 - [Haejoe's walkthrough of the 17-million-line source tree](https://haejoe.com/en/column/riemann-hypothesis-lean-17m-lines-dissection) ([한국어](https://haejoe.com/column/riemann-hypothesis-lean-17m-lines-dissection)).
 
