@@ -53,7 +53,7 @@ Even inside the `10.74M`-line active kernel cone, three major machine-generation
 
 1. **Extreme single-declaration file fragmentation**: `63,899` active files (`43.7%` of all active files) contain exactly one declaration, and `48,922` of those are `≤ 15` declaration lines (`213,750` declaration lines total, inflated by repeated `import` / `open` / `namespace` headers).
 2. **`pp.explicit` typeclass-elaboration dumps in `CapelliIdentities`**: `793 / 880` files (`2,884 / 3,213` declarations, `106,255 / 111,362` declaration lines) are active in the kernel cone. Directly rewriting five 100%-kernel-used files under Lean `v4.33.1` (`-DwarningAsError=true`, `Kernel.isDefEq = true`, `Meta.isDefEq = true`, unchanged imports and axioms) eliminates **12,486 lines (-95.3%)**:
-   - `FixPiIff.lean` (`UpperTheory.Reformulated.B.Gr34.mem_UC`, depth 20): `8,029 → 45` lines (`-99.4%`, [PR #60](https://github.com/leanprover-community/riemann-hypothesis/pull/60)).
+   - `FixPiIff.lean` (`UpperTheory.Reformulated.B.Gr34.mem_UC`, depth 20): `8,029 → 45` lines (`-99.4%`, [PR #60](https://github.com/leanprover-community/riemann-hypothesis/pull/60), **merged** at `173225e84`).
    - `FreeModuleQuotient.lean` (`UpperTheory.Reformulated.B.FreeModuleQuotient.freeN_quot`, depth 19): `2,516 → 84` lines (`-96.7%`, `68 → 0` warnings, [PR #65](https://github.com/leanprover-community/riemann-hypothesis/pull/65)).
    - `ContDiffHerm.lean` (`UpperTheory.Reformulated.B.Qj20.aa_closed` + 18 defs/lemmas, depth 25): `1,727 → 211` lines (`-87.8%`, `20 → 0` warnings, [PR #65](https://github.com/leanprover-community/riemann-hypothesis/pull/65)).
    - `SquareOfApproximation.lean` (`UpperTheory.Reformulated.B.SquareOfApproximation.main` + 4 defs/lemmas, depth 14): `658 → 235` lines (`-64.3%`, `17 → 0` warnings, [PR #65](https://github.com/leanprover-community/riemann-hypothesis/pull/65)).
@@ -260,7 +260,37 @@ Before the `v0.2.1` kernel export was joined against our static DuckDB index, ou
 
 ---
 
-## 8. Reproducibility `[Exact]`
+## 8. Independent External-Kernel Verification & TCB / Metaprogramming Audit `[Exact]` + `[Verified]`
+
+### 8.1 Multi-Kernel & Arithmetic-Consequence Verification (MIT, 2026-11-22 03:10 UTC) `[Exact]`
+
+All entries below are taken verbatim from Andrew Sutherland's [MIT verification page](https://math.mit.edu/~drew/grh/) on Lean `v4.33.1` / Mathlib `v4.33.1` (`solution.ndjson` = `61,570,595,788` B, `sha256 5ea74b91…244e`; `challenge.ndjson` = `350,862,970` B, `sha256 bd484ac9…b2b9`):
+
+| Checker / Audit | Verdict | Scope & Measured Detail |
+| :--- | :--- | :--- |
+| Sandboxed `lake build Main` + export | **PASS (identical)** | Zero errors (offline, read-only source); exported `61.57 GB` proof matches published `sha256 5ea74b91…244e` byte for byte (`175,186/175,187` `.olean`s identical; 1 non-deterministic module) |
+| `#print axioms` & Mathlib integrity | **PASS** | Only `{propext, Classical.choice, Quot.sound}` on all 5 `Main.lean` theorems; all 15 environment axioms reside in `Init`; all `8,322` Mathlib + `378` dependency `.olean`s match official cache byte for byte |
+| `leanchecker` (Lean kernel replay) | **PASS** | `175,187 / 175,187` modules replayed, 0 rejections |
+| `lean4lean` (`67f63b0c`, Lean `v4.33.1`) | **PASS** | `175,187 / 175,187` compiled modules (`175,182` at default limits + `5` `decide +kernel` modules with raised step limit) |
+| `nanoda` (independent Rust kernel) | **PASS** | Full `61.57 GB` export accepted (`exit 0`, 27m 42s on 80 threads) |
+| `con-leche` (`master`, `cd2eceab`, `--verified` + `--compare`) | **PASS** | `1,468,418` solution decls + `51,692` challenge decls accepted (3m 15s on 64 threads); all 5 `Main.lean` theorems justified against `Challenge.lean` |
+| `con-ron --compare` (Rust port, `master`, `3f22699b`) | **PASS** | `1,468,418` solution + `51,692` challenge decls accepted in `--verified` mode (`exit 0`, 7m 06s on 64 threads) |
+| **Zeta-free arithmetic check** (`kimihiro64/Robin1984`, `acab1a3`) | **PASS** | Combining the proof with an independent formalization of Robin's & Lagarias's criteria proves `robin_inequality` ($\forall n > 5040,\ \sigma(n) < e^\gamma n \log\log n$) and `lagarias_inequality` ($\forall n > 0,\ \sigma(n) \le H_n + e^{H_n}\log H_n$) using `{propext, Classical.choice, Quot.sound}` only; combined `61.75 GB` export (`1,472,825` decls, `sha256 44651dcc…26f0d`) accepted by `con-leche --compare`, `con-ron --compare`, and `nanoda` (33m 46s on 64 threads) |
+
+### 8.2 Trusted Computing Base (TCB) & Metaprogramming Audit `[Exact]` + `[Verified]`
+
+Cross-checking upstream [`verification/static-scan.txt`](https://github.com/leanprover-community/riemann-hypothesis/blob/main/verification/static-scan.txt) (across all `175,187` source files) against our line-by-line metaprogramming audit in [meta_audit_verdict.md](meta_audit_verdict.md) confirms **zero TCB bypass paths**:
+
+- **Zero risky declarations or compiler-trust escapes (`[Exact]`)**: `0` `axiom`, `0` `sorry`, `0` `admit`, `0` `native_decide` / `ofReduceBool` / `trustCompiler`, `0` `@[implemented_by]` / `@[extern]`, `0` `unsafe`, `0` `opaque`, `0` `set_option debug.*`, `0` `skipKernelTC`, `0` `initialize`, and `0` non-local `notation`.
+- **Line-by-line verification of every non-zero metaprogramming hit (`[Verified]`)**:
+  - `CutCptCopy.lean` (`addDecl` ×2, `partial def` ×1, `elab` ×1): clones already-proved `Formalism.FourierDecayAlt.*` theorems into compact-support (`...Cpt`) variants by calling `addDecl (.defnDecl ...)` / `addDecl (.thmDecl ...)`, which routes strictly through C++ `lean_add_decl` kernel checking and explicitly rejects `.opaqueInfo`.
+  - `BuildAid/D1..D5.lean` (`run_cmd` / `modifyEnv` ×5): five 4-line files that only append strings to `LibrarySuggestions.nameDenyListExt`; they register `0` kernel declarations (`0/0` in cone) and cannot touch the kernel constant table.
+  - `allowUnsafeReducibility` (37 hits) & `hygiene` (31 hits): all 37 `allowUnsafeReducibility` directives only attach `attribute [local irreducible]` (elaborator transparency); all 31 `hygiene` options are `set_option hygiene false in` scoped to local notations or tactic macros.
+- **Named classical-theorem cross-reference**: For ongoing community verification of the ~183 resolved named statements under `GlobalTheory.Published` and `UpperTheory.LiteratureTheorems`, see upstream [Issue #39](https://github.com/leanprover-community/riemann-hypothesis/issues/39).
+
+---
+
+## 9. Reproducibility `[Exact]`
 
 To re-verify that every active qualified Lean declaration cited in this specification, in [rosetta_stone.md](rosetta_stone.md), and in [rh_proof_explained.md](rh_proof_explained.md) appears in the `v0.2.1` Lean kernel export with **0 dead citations**:
 
