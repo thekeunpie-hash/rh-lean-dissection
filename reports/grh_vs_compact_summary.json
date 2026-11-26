@@ -1,0 +1,142 @@
+{
+  "generated_at": "2026-11-26T12:05:44+09:00",
+  "repositories": {
+    "alpoge_original": "leanprover-community/riemann-hypothesis@alpoge (v0.2.1)",
+    "grh_readable": "lsernau/grh-lean (grh/ @ 72fead1)",
+    "grh_compact": "lsernau/grh-lean (grh-compact/ @ 72fead1)",
+    "upstream_main_baseline": "leanprover-community/riemann-hypothesis@e063a92 (300k readable + TauCeti)"
+  },
+  "metrics": {
+    "alpoge_v021": {
+      "files": 175187,
+      "raw_lines": 17374215,
+      "bytes": 1030531854,
+      "cone_active_decls": 804912,
+      "cone_active_mods": 146287,
+      "cone_active_lines": 10737728,
+      "cone_edges": 11454806,
+      "monolith_import_mathlib": 155753
+    },
+    "grh_readable": {
+      "files": 803,
+      "bytes": 30050271,
+      "unicode_chars": 28605259,
+      "raw_lines": 477124,
+      "code_lines": 299902,
+      "non_ws": 13851128,
+      "tokens": 4836276,
+      "semis": 1438,
+      "avg_non_ws_per_code_line": 46.19,
+      "median_code_line_len": 58,
+      "p95_code_line_len": 92,
+      "max_line_len": 100,
+      "semis_per_1k_code_lines": 4.79
+    },
+    "grh_compact": {
+      "files": 794,
+      "bytes": 7420187,
+      "unicode_chars": 7036056,
+      "raw_lines": 112827,
+      "code_lines": 76149,
+      "non_ws": 4511672,
+      "tokens": 1520003,
+      "semis": 10825,
+      "avg_non_ws_per_code_line": 59.25,
+      "median_code_line_len": 78,
+      "p95_code_line_len": 97,
+      "max_line_len": 767,
+      "semis_per_1k_code_lines": 142.16
+    },
+    "upstream_main_e063a92": {
+      "files": 802,
+      "raw_lines": 475679,
+      "code_lines": 299004,
+      "non_ws": 13808784,
+      "tokens": 4822217,
+      "backward": 28,
+      "heartbeats": 5,
+      "mono_mathlib": 2
+    }
+  },
+  "kernel_dbs": {
+    "grh_readable": {
+      "total_consts": 64358,
+      "cone_consts": 49821,
+      "user_decls": 29340,
+      "user_cone_decls": 25793,
+      "dead_code_decls": 442,
+      "dead_code_lines": 3643,
+      "edges": 711498,
+      "modules": 802
+    },
+    "grh_compact": {
+      "total_decls": 51804,
+      "in_cone_decls": 37569,
+      "dead_decls": 14235,
+      "edges": 491491,
+      "files": 794
+    }
+  },
+  "kernel_export_facts": {
+    "source": "MIT Andrew Sutherland (Lean Zulip #658556 msg 643721394, lake comparator export)",
+    "grh_readable_export_bytes": 4485867644,
+    "grh_compact_export_bytes": 5172274528,
+    "compact_vs_readable_export_pct": 15.3,
+    "grh_readable_build_sec": 1932,
+    "grh_compact_build_sec": 2012
+  },
+  "module_overlap_summary": {
+    "grh_count": 803,
+    "compact_count": 794,
+    "shared_count": 74,
+    "only_in_grh_count": 729,
+    "only_in_compact_count": 720,
+    "basename_overlap": 163
+  },
+  "classification_counts": {
+    "shared_modules": 74,
+    "genuine_shorter_in_compact": 64,
+    "pure_line_packing": 1,
+    "compact_larger_non_ws": 2
+  },
+  "structural_layout": {
+    "grh_top_dirs": {"Lib": 495, "New": 306, "Main": 1, "Statements": 1},
+    "compact_top_dirs": {"Lib": 573, "New": 219, "Main": 1, "Statements": 1},
+    "packing_factor_non_ws_per_line": 1.28,
+    "genuine_token_reduction_pct": -68.57,
+    "genuine_non_ws_reduction_pct": -67.43,
+    "kernel_export_growth_pct": 15.3
+  },
+  "tactic_shift": {
+    "tauto": {"grh": 78, "compact": 684, "ratio": 8.769},
+    "simp_all": {"grh": 489, "compact": 2042, "ratio": 4.176},
+    "aesop": {"grh": 393, "compact": 1258, "ratio": 3.201},
+    "grind": {"grh": 1792, "compact": 2713, "ratio": 1.514},
+    "calc": {"grh": 2550, "compact": 4, "ratio": 0.002},
+    "rw": {"grh": 14963, "compact": 1121, "ratio": 0.075},
+    "exact": {"grh": 11002, "compact": 974, "ratio": 0.089},
+    "refine": {"grh": 8300, "compact": 920, "ratio": 0.111},
+    "have": {"grh": 38151, "compact": 4718, "ratio": 0.124},
+    "obtain": {"grh": 11834, "compact": 1698, "ratio": 0.143},
+    "theorem": {"grh": 2069, "compact": 162, "ratio": 0.078},
+    "lemma": {"grh": 16968, "compact": 7163, "ratio": 0.422},
+    "structure": {"grh": 684, "compact": 222, "ratio": 0.325}
+  },
+  "symbol_shift": {
+    "<;>": {"grh": 1148, "compact": 3187, "ratio": 2.776},
+    ";": {"grh": 8200, "compact": 13090, "ratio": 1.596},
+    ":= by": {"grh": 41328, "compact": 5254, "ratio": 0.127}
+  },
+  "top_10_genuine_harvest_targets": [
+    {"module": "Lib.Shimura.ThetaModuli.FamilyFromPoints", "grh_non_ws": 39192, "comp_non_ws": 10477, "non_ws_pct": -73.27, "tokens_pct": -70.06, "pack_ratio": 1.2},
+    {"module": "Lib.Cohomology.Hodge.FixedPointFormula", "grh_non_ws": 32804, "comp_non_ws": 5536, "non_ws_pct": -83.12, "tokens_pct": -81.55, "pack_ratio": 1.29},
+    {"module": "Lib.Cohomology.Etale.ProperFunctors", "grh_non_ws": 28987, "comp_non_ws": 3188, "non_ws_pct": -89.0, "tokens_pct": -87.78, "pack_ratio": 1.37},
+    {"module": "Lib.ClassField.GreenbergWiles.SplitPrimeReciprocity", "grh_non_ws": 31977, "comp_non_ws": 6727, "non_ws_pct": -78.96, "tokens_pct": -75.72, "pack_ratio": 1.33},
+    {"module": "Lib.Weil.Construction.FiniteMultiplier", "grh_non_ws": 29372, "comp_non_ws": 6755, "non_ws_pct": -77.0, "tokens_pct": -79.85, "pack_ratio": 1.25},
+    {"module": "Lib.Cohomology.Hodge.GrothendieckSymbol", "grh_non_ws": 30348, "comp_non_ws": 8097, "non_ws_pct": -73.32, "tokens_pct": -71.58, "pack_ratio": 1.4},
+    {"module": "Lib.Shimura.ThetaModuli.FlatClosure", "grh_non_ws": 29343, "comp_non_ws": 7095, "non_ws_pct": -75.82, "tokens_pct": -76.3, "pack_ratio": 1.37},
+    {"module": "Lib.PadicHodge.PeriodRings.Ainf", "grh_non_ws": 28003, "comp_non_ws": 5861, "non_ws_pct": -79.07, "tokens_pct": -79.66, "pack_ratio": 1.25},
+    {"module": "Lib.GaloisRep.Main.SeedRepresentation", "grh_non_ws": 30320, "comp_non_ws": 8759, "non_ws_pct": -71.11, "tokens_pct": -70.99, "pack_ratio": 1.23},
+    {"module": "Lib.LocalGL.Iwahori.SortedExponents", "grh_non_ws": 28247, "comp_non_ws": 6911, "non_ws_pct": -75.53, "tokens_pct": -76.3, "pack_ratio": 1.25}
+  ]
+}
